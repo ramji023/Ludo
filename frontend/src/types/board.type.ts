@@ -5,5 +5,5 @@ export const cellStyle: cellStyleType = {
   yellow: "bg-yellow-500 border-1 border-black",
   blue: "bg-blue-500 border-1 border-black",
   path: "bg-white border-1 border-black",
-  none: "bg-gray-200 ",
+  none: "bg-gray-200",
 };
