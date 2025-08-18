@@ -4,4 +4,6 @@
 
 @theme {
   --font-poppins: "Poppins", sans-serif;
+  --grid-cols-15: repeat(15, minmax(0, 1fr));
+  --grid-rows-15: repeat(15, minmax(0, 1fr));
 }
