@@ -4,7 +4,6 @@ import { v4 as uuidv4 } from "uuid";
 export class User {
   public id: string;
   public socket: WebSocket;
-  private isHost: boolean = false;
   public name: string;
   public color: string;
   public currentPosition: { pawns: string; position: string }[] = [];
@@ -13,9 +12,8 @@ export class User {
     socket: WebSocket,
     name: string,
     color: string,
-    isHost?: boolean
   ) {
-    this.socket = socket;  
+    this.socket = socket;
     this.id = uuidv4();
     this.name = name;
     this.color = color;
@@ -27,8 +25,6 @@ export class User {
       this.currentPosition.push(newObject);
     });
     this.prevPosition = [...this.currentPosition];
-    if (isHost) {
-      this.isHost = true;
-    }
   }
+
 }

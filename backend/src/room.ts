@@ -4,19 +4,31 @@ export class Room {
   public roomId: string;
   public players: Map<string, User>;
   public hostId: string;
+  public status: "waiting" | "playing" | "finished";
   constructor(user: User) {
     this.roomId = uuidv4();
     const map = new Map();
     this.players = map.set(user.id, user);
     this.hostId = user.id;
+    this.status = "waiting";
   }
-  /*
-  initializeRoom(roomId: string, player: User) {
-    this.roomId = roomId;
-    this.players.set(player.id, player);
-  }
-* */
+
   addPlayer(player: User) {
     this.players.set(player.id, player);
+  }
+
+  // ensure that there should be 4 player
+  canStart() {
+    return this.players.size === 4;
+  }
+
+  // check if user is host
+  isHost(id: string) {
+       return this.hostId === id
+  }
+
+  // check if any user dont select same color
+  checkColors() {
+    
   }
 }

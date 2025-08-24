@@ -61,10 +61,9 @@ export class GameManager {
     "payload" : {
       "name" : "Zassicca"
       "color" : "blue"
-      "isHost" : true
     }
     */
-    const user = new User(socket, payload.name, payload.color,payload.isHost);
+    const user = new User(socket, payload.name, payload.color);
 
     console.log("user object after creating room : ", user);
     const room = new Room(user); // create a new room object
@@ -83,6 +82,8 @@ export class GameManager {
       "roomId" : "..."
     }
     */
+
+    // check user is joinee or host
     const user = new User(socket, payload.name, payload.color);
     console.log("user object after joining room : ", user);
 
@@ -102,9 +103,14 @@ export class GameManager {
       "roomId" : "..."
     }
     */
-    // check if user is host or not
     const room = this.rooms.get(payload.roomId);
-    if (room && room.hostId === payload.id) {
+    // check if user is host or not
+    if (room && room.isHost(payload.id)) {
+      // check there should be 4 player
+      if (!room.canStart()) {
+        return;
+      }
+      room.status = "playing";
       const user = room.players.get(payload.id);
       if (user) {
         const game = new Game();
@@ -118,12 +124,20 @@ export class GameManager {
   // when player make move
   makeMove(socket: WebSocket, parsedMessage: any) {
     const payload = parsedMessage.payload;
+    /*
+    "payload" : {
+      "id" : "..."
+      "roomId" : "..."
+      "diceValue" : ...
+      "pawns" : ""
+    }
+    */ 
     const room = this.rooms.get(payload.roomId);
     if (room) {
       const user = room.players.get(payload.id);
       if (user && user.socket === socket) {
         const game = this.games.get(payload.roomId);
-        if (game) {
+        if (game && !game.isGameOver()) {
           game.makeMove(payload.roomId, payload.diceValue, payload.pawns, user);
         }
       }

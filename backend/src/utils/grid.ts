@@ -119,11 +119,11 @@ export function isVictoryPath(position: string, color: string) {
 }
 
 export function isStart(position: string, color: string) {
-  const globalPosition = startPoints[color].findIndex(
-    (path) => path === position
-  );
-
-  if (globalPosition >= 0) return globalPosition;
+  const pawnPosition = homePoints[color][0];
+  const globalArrayIndex = globalGamePath.findIndex((path)=>path===pawnPosition)
+  if(globalArrayIndex >= 0){
+    return globalArrayIndex
+  }
 
   return null;
 }
