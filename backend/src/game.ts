@@ -1,5 +1,13 @@
 import { User } from "./user";
-import {} from "./utils/grid"
+import {
+  homePoints,
+  isHome,
+  isPath,
+  isSafe,
+  isStart,
+  isVictory,
+  isVictoryPath,
+} from "./utils/grid";
 export class Game {
   private roomId: string;
   private diceValue: number | null;
@@ -15,23 +23,35 @@ export class Game {
     this.players.set(player.id, player);
   }
 
-  makeMove(roomId:string,diceValue:number,pawn:string,player:User){
-      const currentPlayer = this.players.get(player.id)
-      if(currentPlayer){
-        const currentPosition = currentPlayer.currentPosition
-        
-        // if player in home area
-
-        // if player in safe place
-
-        // if player in start point
-
-        // if player in path
-
-        // if player in victory path
-
-        // if player in victory box
-
+  makeMove(roomId: string, diceValue: number, pawn: string, player: User) {
+    const currentPlayer = this.players.get(player.id);
+    if (currentPlayer) {
+      const currentPosition = currentPlayer.currentPosition;
+      const pawnPosition = currentPosition.find((obj, i) => obj.pawns === pawn);
+      // if player in home area
+      if (pawnPosition && isHome(pawnPosition.position, currentPlayer.color)) {
       }
+      // if player in safe place
+      if (pawnPosition && isSafe(pawnPosition.position, currentPlayer.color)) {
+      }
+      // if player in start point
+      if (pawnPosition && isStart(pawnPosition.position, currentPlayer.color)) {
+      }
+      // if player in path
+      if (pawnPosition && isPath(pawnPosition.position, currentPlayer.color)) {
+      }
+      // if player in victory path
+      if (
+        pawnPosition &&
+        isVictoryPath(pawnPosition.position, currentPlayer.color)
+      ) {
+      }
+      // if player in victory box
+      if (
+        pawnPosition &&
+        isVictory(pawnPosition.position, currentPlayer.color)
+      ) {
+      }
+    }
   }
 }

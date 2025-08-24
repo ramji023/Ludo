@@ -53,32 +53,85 @@ export const globalGamePath = [
   "r6c0",
 ];
 
-export const victoryPaths = {
+export const victoryPaths: Record<string, string[]> = {
   blue: ["r5c7", "r4c7", "r3c7", "r2c7", "r1c7"],
   green: ["r7c9", "r7c10", "r7c11", "r7c12", "r7c13"],
   yellow: ["r9c7", "r10c7", "r11c7", "r12c7", "r13c7"],
   red: ["r7c5", "r7c4", "r7c3", "r7c2", "r7c1"],
 };
 
-type homePoints = Record<string,string[]>
-export const homePoints:homePoints = {
+type homePoints = Record<string, string[]>;
+export const homePoints: homePoints = {
   red: ["r1c1", "r1c4", "r4c1", "r4c4"],
   blue: ["r1c10", "r1c13", "r4c10", "r4c13"],
   green: ["r10c10", "r10c13", "r13c10", "r13c13"],
   yellow: ["r10c1", "r10c4", "r13c1", "r13c4"],
 };
 
-
-export const startPoints = {
+export const startPoints: Record<string, string[]> = {
   red: ["r6c1"],
   blue: ["r1c8"],
   green: ["r8c13"],
   yellow: ["r13c6"],
 };
 
-export const safePoints = [
-  "r8c2",
-  "r2c6",
-  "r6c12",
-  "r12c8",
-];
+export const safePoints = ["r8c2", "r2c6", "r6c12", "r12c8"];
+
+export const victoryBox: Record<string, string[]> = {
+  red: [],
+  blue: [],
+  green: [],
+  yellow: [],
+};
+
+export function isHome(position: string, color: string) {
+  if (homePoints[color].includes(position)) {
+    return true;
+  }
+
+  return false;
+}
+
+export function isSafe(position: string, color: string) {
+  if (safePoints.includes(position)) {
+    return true;
+  }
+
+  return false;
+}
+
+export function isPath(position: string, color: string) {
+  const globalPosition = globalGamePath.findIndex((path) => path === position);
+
+  if (globalPosition >= 0) return globalPosition;
+
+  return null;
+}
+
+export function isVictoryPath(position: string, color: string) {
+  const globalPosition = victoryPaths[color].findIndex(
+    (path) => path === position
+  );
+
+  if (globalPosition >= 0) return globalPosition;
+
+  return null;
+}
+
+export function isStart(position: string, color: string) {
+  const globalPosition = startPoints[color].findIndex(
+    (path) => path === position
+  );
+
+  if (globalPosition >= 0) return globalPosition;
+
+  return null;
+}
+
+export function isVictory(position: string, color: string) {
+  if (victoryBox[color].includes(position)) {
+    return true;
+  }
+
+  return false;
+}

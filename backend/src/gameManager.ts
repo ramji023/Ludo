@@ -15,18 +15,29 @@ export class GameManager {
 
   addUser(socket: WebSocket) {
     this.users.push(socket);
+    socket.send("Heyy from server");
     this.addHandler(socket);
   }
 
   private addHandler(socket: WebSocket) {
+    // user send an event to server
     socket.on("message", (message) => {
       const parsedMessage = JSON.parse(message.toString());
+      /* 
+      parsedMessage = {
+           "type" : "create_room",
+           "payload" : {
+             
+           }
+      }
+           */
 
-      // if client send create room event
+      // if host send create room event
       if (parsedMessage.type === CREATE_ROOM) {
         this.createRoom(socket, parsedMessage);
       }
-      // if client send join room event
+
+      // if player send join room event
       if (parsedMessage.type === JOIN_ROOM) {
         this.joinRoom(socket, parsedMessage);
       }
@@ -46,37 +57,51 @@ export class GameManager {
   // when host create the room
   createRoom(socket: WebSocket, parsedMessage: any) {
     const payload = parsedMessage.payload;
-    const user = new User(
-      socket,
-      payload.id,
-      payload.name,
-      parsedMessage.color,
-      payload.isHost
-    );
-    const room = new Room();
-    room.initializeRoom(payload.id, user);
-    this.rooms.set(payload.roomId, room);
+    /*
+    "payload" : {
+      "name" : "Zassicca"
+      "color" : "blue"
+      "isHost" : true
+    }
+    */
+    const user = new User(socket, payload.name, payload.color,payload.isHost);
+
+    console.log("user object after creating room : ", user);
+    const room = new Room(user); // create a new room object
+    console.log("room object after creating room : ", room);
+    // room.initializeRoom(payload.id, user);
+    this.rooms.set(room.roomId, room); // set the new room in game manager class
   }
 
   // when someone join the room
   joinRoom(socket: WebSocket, parsedMessage: any) {
     const payload = parsedMessage.payload;
-    const user = new User(
-      socket,
-      payload.id,
-      payload.name,
-      parsedMessage.color
-    );
+    /*
+    "payload" : {
+      "name" : "Bob"
+      "color" : "green"
+      "roomId" : "..."
+    }
+    */
+    const user = new User(socket, payload.name, payload.color);
+    console.log("user object after joining room : ", user);
 
     const room = this.rooms.get(payload.roomId);
     if (room) {
       room.addPlayer(user);
     }
+    console.log("room object after joining room : ", room);
   }
 
   // when host start to play game
   startGame(socket: WebSocket, parsedMessage: any) {
     const payload = parsedMessage.payload;
+    /*
+    "payload" : {
+      "id" : "..."
+      "roomId" : "..."
+    }
+    */
     // check if user is host or not
     const room = this.rooms.get(payload.roomId);
     if (room && room.hostId === payload.id) {
@@ -85,6 +110,7 @@ export class GameManager {
         const game = new Game();
         game.startGame(payload.roomId, user);
         this.games.set(payload.roomId, game);
+        console.log("game object after starting the game : ", game);
       }
     }
   }
@@ -98,7 +124,7 @@ export class GameManager {
       if (user && user.socket === socket) {
         const game = this.games.get(payload.roomId);
         if (game) {
-          game.makeMove(payload.roomId, payload.diceValue,payload.pawns, user);
+          game.makeMove(payload.roomId, payload.diceValue, payload.pawns, user);
         }
       }
     }
