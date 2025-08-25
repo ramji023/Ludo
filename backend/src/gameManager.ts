@@ -1,5 +1,13 @@
 import { WebSocket } from "ws";
-import { CREATE_ROOM, JOIN_ROOM, MAKE_MOVE, START_GAME } from "./messages";
+import {
+  CREATE_ROOM,
+  GAME_STARTED,
+  JOIN_ROOM,
+  MAKE_MOVE,
+  ROOM_CREATED,
+  ROOM_JOINED,
+  START_GAME,
+} from "./messages";
 import { User } from "./user";
 import { Room } from "./room";
 import { Game } from "./game";
@@ -70,6 +78,11 @@ export class GameManager {
     console.log("room object after creating room : ", room);
     // room.initializeRoom(payload.id, user);
     this.rooms.set(room.roomId, room); // set the new room in game manager class
+
+    //broadcast room created event to client
+    socket.send(
+      JSON.stringify({ type: ROOM_CREATED, payload: { roomId: room.roomId } })
+    );
   }
 
   // when someone join the room
@@ -90,6 +103,15 @@ export class GameManager {
     const room = this.rooms.get(payload.roomId);
     if (room) {
       room.addPlayer(user);
+      //broadcast joined room event to client
+      room?.players.forEach((player, playerId) => {
+        player.socket.send(
+          JSON.stringify({
+            type: ROOM_JOINED,
+            payload: { message: `${user.name} has joined the game` },
+          })
+        );
+      });
     }
     console.log("room object after joining room : ", room);
   }
@@ -111,12 +133,41 @@ export class GameManager {
         return;
       }
       room.status = "playing";
-      const user = room.players.get(payload.id);
-      if (user) {
+      const users = room.players;
+      if (users) {
         const game = new Game();
-        game.startGame(payload.roomId, user);
+        game.startGame(payload.roomId,payload.id, users);
         this.games.set(payload.roomId, game);
         console.log("game object after starting the game : ", game);
+          
+
+        //broadcast start game event to all the players
+        interface playerArray {
+          name: string;
+          color: string;
+          currentpawnsPosition: {
+            pawns: string;
+            position: string;
+          }[];
+        }
+        let players: playerArray[] = [];
+        game.players.forEach((player, playerId) => {
+          players.push({
+            name: player.name,
+            color: player.color,
+            currentpawnsPosition: player.currentPosition,
+          });
+        });
+
+        game.players.forEach((player) => {
+          player.socket.send(
+            JSON.stringify({
+              type: GAME_STARTED,
+              payload: { players: players },
+              rollTurn : game.rollTurn
+            })
+          );
+        });
       }
     }
   }
@@ -131,7 +182,7 @@ export class GameManager {
       "diceValue" : ...
       "pawns" : ""
     }
-    */ 
+    */
     const room = this.rooms.get(payload.roomId);
     if (room) {
       const user = room.players.get(payload.id);
