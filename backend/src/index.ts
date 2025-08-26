@@ -5,7 +5,7 @@ const wss = new WebSocketServer({ port: 8080 });
 import { GameManager } from "./gameManager";
 const newGameManager = new GameManager();
 wss.on("connection", function (ws) {
-  
+  console.log("someone join the connection")
   newGameManager.addUser(ws); // new user send first request to server
 
   ws.on("close",function(){

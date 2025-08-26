@@ -81,7 +81,7 @@ export class GameManager {
 
     //broadcast room created event to client
     socket.send(
-      JSON.stringify({ type: ROOM_CREATED, payload: { roomId: room.roomId } })
+      JSON.stringify({ type: ROOM_CREATED, payload: { roomId: room.roomId,userId:user.id } })
     );
   }
 
