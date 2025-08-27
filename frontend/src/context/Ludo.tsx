@@ -21,17 +21,20 @@ interface LudoStateType {
   status: "waiting" | "in-progress" | "finished";
   players: PlayerState[];
   myPlayerId: string;
+  color: string;
   currentTurn: string;
   diceValue: number | null;
   pawns: {
     [playerId: string]: { [pawnId: string]: number };
   };
+  rollTurn: string;
   winner: string | null;
 }
 
 interface ludoContextType {
   ludoState: LudoStateType | null;
   setLudoState: React.Dispatch<React.SetStateAction<LudoStateType>>;
+  messages: string[];
 }
 
 export const ludoStateContext = createContext<ludoContextType | null>(null);
@@ -48,12 +51,14 @@ export const LudoStateContextProvider = ({
     status: "waiting",
     players: [],
     myPlayerId: "",
+    color: "",
     currentTurn: "",
     diceValue: null,
     pawns: {},
     winner: null,
+    rollTurn: "",
   });
-
+  const [messages, setMessages] = useState<string[]>([]);
   const { socket } = useSocket();
 
   // first time run when re-render
@@ -68,8 +73,28 @@ export const LudoStateContextProvider = ({
           case "room_created":
             setLudoState((curr) => ({
               ...curr,
+              isHost: true,
               myPlayerId: data.payload.userId,
               roomId: data.payload.roomId,
+            }));
+            setMessages((curr) => [...curr, data.message]);
+            break;
+          case "room_joined":
+            setLudoState((curr) => ({
+              ...curr,
+              myPlayerId: data.payload.id,
+              roomId: data.payload.roomId,
+            }));
+            setMessages((curr) => [...curr, data.message]);
+            break;
+          case "game_started":
+            setLudoState((curr) => ({
+              ...curr,
+              rollTurn: data.payload.rollTurn,
+              players: curr.players.map((player) => ({
+                ...player,
+                ...data.payload.players,
+              })),
             }));
             break;
         }
@@ -78,7 +103,7 @@ export const LudoStateContextProvider = ({
   }, [socket]);
 
   return (
-    <ludoStateContext.Provider value={{ ludoState, setLudoState }}>
+    <ludoStateContext.Provider value={{ ludoState, setLudoState, messages }}>
       {children}
     </ludoStateContext.Provider>
   );

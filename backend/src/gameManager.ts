@@ -23,7 +23,7 @@ export class GameManager {
 
   addUser(socket: WebSocket) {
     this.users.push(socket);
-    socket.send("Heyy from server");
+    socket.send(JSON.stringify({ msg: "user added to the server" }));
     this.addHandler(socket);
   }
 
@@ -81,7 +81,11 @@ export class GameManager {
 
     //broadcast room created event to client
     socket.send(
-      JSON.stringify({ type: ROOM_CREATED, payload: { roomId: room.roomId,userId:user.id } })
+      JSON.stringify({
+        type: ROOM_CREATED,
+        payload: { roomId: room.roomId, userId: user.id },
+        message: `${user.name} has joined the game`,
+      })
     );
   }
 
@@ -108,7 +112,11 @@ export class GameManager {
         player.socket.send(
           JSON.stringify({
             type: ROOM_JOINED,
-            payload: { message: `${user.name} has joined the game` },
+            payload: {
+              id: user.id,
+              roomId: room.roomId,
+            },
+            message: `${user.name} has joined the game`,
           })
         );
       });
@@ -136,13 +144,13 @@ export class GameManager {
       const users = room.players;
       if (users) {
         const game = new Game();
-        game.startGame(payload.roomId,payload.id, users);
+        game.startGame(payload.roomId, payload.id, users);
         this.games.set(payload.roomId, game);
         console.log("game object after starting the game : ", game);
-          
 
         //broadcast start game event to all the players
         interface playerArray {
+          id:string;
           name: string;
           color: string;
           currentpawnsPosition: {
@@ -153,6 +161,7 @@ export class GameManager {
         let players: playerArray[] = [];
         game.players.forEach((player, playerId) => {
           players.push({
+            id:player.id,
             name: player.name,
             color: player.color,
             currentpawnsPosition: player.currentPosition,
@@ -164,7 +173,7 @@ export class GameManager {
             JSON.stringify({
               type: GAME_STARTED,
               payload: { players: players },
-              rollTurn : game.rollTurn
+              rollTurn: game.rollTurn,
             })
           );
         });
