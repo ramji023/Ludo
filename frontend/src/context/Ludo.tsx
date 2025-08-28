@@ -110,6 +110,12 @@ export const LudoStateContextProvider = ({
               ),
             }));
             break;
+          case "rolled_dice":
+            setLudoState((curr) => ({
+              ...curr,
+              diceValue: data.payload.diceValue,
+            }));
+            break;
         }
       };
     }

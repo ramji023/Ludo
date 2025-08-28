@@ -31,7 +31,7 @@ export default function GameBoard() {
   ];
   // console.log("players data :", players);
   // console.log("active player turn id :", activePlayer);
-  //  console.log("roll turn outside useEffect",gameState?.ludoState?.rollTurn)
+  console.log("roll turn outside useEffect", gameState?.ludoState?.myPlayerId);
   return (
     <div className=" flex items-center justify-center bg-[url('/lobby-assets/loby-bg.jpg')] ">
       <div className="w-[800px] relative">
@@ -51,8 +51,15 @@ export default function GameBoard() {
 
             {/* Dice */}
             <Dice
+              playerId={gameState?.ludoState?.myPlayerId}
+              roomId={gameState?.ludoState?.roomId}
+              socket={gameState?.ludoState?.connection}
               onRoll={(v) => console.log(`${player.name} rolled`, v)}
-              isActive={activePlayer === player.id}
+              isRolled={activePlayer === player.id}
+              isActive={
+                activePlayer === gameState?.ludoState?.myPlayerId &&
+                player.id === gameState?.ludoState?.myPlayerId
+              }
             />
           </div>
         ))}

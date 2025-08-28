@@ -29,9 +29,10 @@ export default function Lobby() {
   //update the new room code in newRoom input element
   useEffect(() => {
     console.log(state?.players)
-    if (state?.players.length === 4) {
+    if (state?.players.length === 2) {
       navigate("/game");
     }
+    // navigate("/game");
   }, [state]);
 
   if (state?.myPlayerId !== "" && state?.roomId !== "") {

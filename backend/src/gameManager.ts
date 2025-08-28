@@ -4,6 +4,8 @@ import {
   GAME_STARTED,
   JOIN_ROOM,
   MAKE_MOVE,
+  ROLL_DICE,
+  ROLLED_DICE,
   ROOM_CREATED,
   ROOM_JOINED,
   START_GAME,
@@ -55,6 +57,10 @@ export class GameManager {
         this.startGame(socket, parsedMessage);
       }
 
+      // if player roll dice
+      if (parsedMessage.type === ROLL_DICE) {
+        this.rollDice(socket, parsedMessage);
+      }
       // if player make move
       if (parsedMessage.type === MAKE_MOVE) {
         this.makeMove(socket, parsedMessage);
@@ -133,17 +139,17 @@ export class GameManager {
       "roomId" : "..."
     }
     */
-   console.log("hit the start game checkpoint 0")
+    //  console.log("hit the start game checkpoint 0")
     const room = this.rooms.get(payload.roomId);
-     console.log("hit the start game checkpoint 1",room)
+    //  console.log("hit the start game checkpoint 1",room)
     // check if user is host or not
     if (room && room.isHost(payload.id)) {
-      console.log("hit the start game checkpoint 2")
+      // console.log("hit the start game checkpoint 2")
       // check there should be 4 player
-      if (!room.canStart()) {
-        return;
-      }
-      console.log("hit the start game checkpoint 3")
+      // if (!room.canStart()) {
+      //   return;
+      // }
+      console.log("hit the start game checkpoint 3");
       room.status = "playing";
       const users = room.players;
       if (users) {
@@ -154,7 +160,7 @@ export class GameManager {
 
         //broadcast start game event to all the players
         interface playerArray {
-          id:string;
+          id: string;
           name: string;
           color: string;
           currentpawnsPosition: {
@@ -165,7 +171,7 @@ export class GameManager {
         let players: playerArray[] = [];
         game.players.forEach((player, playerId) => {
           players.push({
-            id:player.id,
+            id: player.id,
             name: player.name,
             color: player.color,
             currentpawnsPosition: player.currentPosition,
@@ -182,6 +188,26 @@ export class GameManager {
           );
         });
       }
+    }
+  }
+
+  rollDice(socket: WebSocket, parsedMessage: any) {
+    const payload = parsedMessage.payload;
+    const game = this.games.get(payload.roomId);
+    if (game && game.players.get(payload.id) && game.rollTurn === payload.id) {
+      const newVal = Math.floor(Math.random() * 6) + 1;
+      game.players.forEach((player) => {
+        player.socket.send(
+          JSON.stringify({
+            type: ROLLED_DICE,
+            payload: {
+              playerId: payload.id,
+              roomId: payload.roomId,
+              diceValue: newVal,
+            },
+          })
+        );
+      });
     }
   }
 
