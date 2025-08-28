@@ -19,6 +19,7 @@ export class Room {
 
   // ensure that there should be 4 player
   canStart() {
+    console.log("number of players in room : ",this.players.size)
     return this.players.size === 4;
   }
 

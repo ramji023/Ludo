@@ -133,13 +133,17 @@ export class GameManager {
       "roomId" : "..."
     }
     */
+   console.log("hit the start game checkpoint 0")
     const room = this.rooms.get(payload.roomId);
+     console.log("hit the start game checkpoint 1",room)
     // check if user is host or not
     if (room && room.isHost(payload.id)) {
+      console.log("hit the start game checkpoint 2")
       // check there should be 4 player
       if (!room.canStart()) {
         return;
       }
+      console.log("hit the start game checkpoint 3")
       room.status = "playing";
       const users = room.players;
       if (users) {

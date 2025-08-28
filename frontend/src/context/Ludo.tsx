@@ -4,7 +4,7 @@ import { useSocket } from "../hooks/useSocket";
 
 interface PawnState {
   id: string;
-  position: number;
+  position: string;
 }
 
 interface PlayerState {
@@ -82,7 +82,8 @@ export const LudoStateContextProvider = ({
           case "room_joined":
             setLudoState((curr) => ({
               ...curr,
-              myPlayerId: data.payload.id,
+              myPlayerId:
+                curr.myPlayerId === "" ? data.payload.id : curr.myPlayerId,
               roomId: data.payload.roomId,
             }));
             setMessages((curr) => [...curr, data.message]);
@@ -90,11 +91,23 @@ export const LudoStateContextProvider = ({
           case "game_started":
             setLudoState((curr) => ({
               ...curr,
-              rollTurn: data.payload.rollTurn,
-              players: curr.players.map((player) => ({
-                ...player,
-                ...data.payload.players,
-              })),
+              rollTurn: data.rollTurn,
+              players: data.payload.players.map(
+                (player: {
+                  id: string;
+                  name: string;
+                  color: string;
+                  currentpawnsPosition: { pawns: string; position: string }[];
+                }) => ({
+                  id: player.id,
+                  name: player.name,
+                  color: player.color,
+                  pawns: player.currentpawnsPosition.map((pawn) => ({
+                    id: pawn.pawns,
+                    position: pawn.position,
+                  })),
+                })
+              ),
             }));
             break;
         }
