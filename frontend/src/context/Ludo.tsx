@@ -26,6 +26,7 @@ interface LudoStateType {
   diceValue: number | null;
   currentMove: {
     playerId: string;
+    color: string;
     pawnId: string;
     newPosition: string;
   } | null;
@@ -86,7 +87,7 @@ export const LudoStateContextProvider = ({
               ...curr,
               myPlayerId:
                 curr.myPlayerId === "" ? data.payload.id : curr.myPlayerId,
-              roomId: data.payload.roomId,
+              roomId: curr.roomId === "" ? data.payload.roomId : curr.roomId,
             }));
             setMessages((curr) => [...curr, data.message]);
             break;
@@ -119,17 +120,19 @@ export const LudoStateContextProvider = ({
             }));
             break;
           case "moved_make":
-            if (data.payload.roomId === ludoState.roomId) {
-              setLudoState((curr) => ({
+            setLudoState((curr) => {
+              if (data.payload.roomId !== curr.roomId) return curr; 
+              return {
                 ...curr,
                 currentMove: {
                   playerId: data.payload.id,
+                  color: data.payload.color,
                   pawnId: data.payload.pawn,
                   newPosition: data.payload.pawnPosition,
                 },
                 rollTurn: data.payload.rollTurn,
-              }));
-            }
+              };
+            });
         }
       };
     }

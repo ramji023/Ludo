@@ -53,30 +53,68 @@ export const globalGamePath = [
   "r6c0",
 ];
 
-export const victoryPaths = {
-  blue: ["r5c7", "r4c7", "r3c7", "r2c7", "r1c7"],
-  green: ["r7c9", "r7c10", "r7c11", "r7c12", "r7c13"],
-  yellow: ["r9c7", "r10c7", "r11c7", "r12c7", "r13c7"],
-  red: ["r7c5", "r7c4", "r7c3", "r7c2", "r7c1"],
+export const victoryPaths: Record<string, string[]> = {
+  blue: ["r0c7", "r1c7", "r2c7", "r3c7", "r4c7", "r5c7"],
+  green: ["r7c14", "r7c13", "r7c12", "r7c11", "r7c10", "r7c9"],
+  yellow: ["r14c7", "r13c7", "r12c7", "r11c7", "r10c7", "r9c7"],
+  red: ["r7c0", "r7c1", "r7c2", "r7c3", "r7c4", "r7c5"],
 };
 
-export const homePoints = {
+export const homePoints: Record<string, string[]> = {
   red: ["r1c1", "r1c4", "r4c1", "r4c4"],
   blue: ["r1c10", "r1c13", "r4c10", "r4c13"],
   green: ["r10c10", "r10c13", "r13c10", "r13c13"],
   yellow: ["r10c1", "r10c4", "r13c1", "r13c4"],
 };
 
-export const startPoints = {
+export const startPoints: Record<string, string[]> = {
   red: ["r6c1"],
   blue: ["r1c8"],
   green: ["r8c13"],
   yellow: ["r13c6"],
 };
 
-export const safePoints = [
-  "r8c2",
-  "r2c6",
-  "r6c12",
-  "r12c8",
-];
+export const safePoints = ["r8c2", "r2c6", "r6c12", "r12c8"];
+
+
+export function getMovementPath(
+  color: string,
+  prev: string,
+  curr: string
+): string[] {
+  // prev in home → jump directly to start point
+  if (homePoints[color].includes(prev) && startPoints[color].includes(curr)) {
+    return [curr];
+  }
+
+  // prev in global path
+  if (globalGamePath.includes(prev)) {
+    // moving along global path
+    if (globalGamePath.includes(curr)) {
+      const startIndex = globalGamePath.indexOf(prev);
+      const endIndex = globalGamePath.indexOf(curr);
+
+      if (endIndex > startIndex) {
+        return globalGamePath.slice(startIndex + 1, endIndex + 1);
+      }
+    }
+
+    // moving into victory path
+    if (victoryPaths[color].includes(curr)) {
+      const entryIndex = victoryPaths[color].indexOf(curr);
+      return [...victoryPaths[color].slice(0, entryIndex + 1)];
+    }
+  }
+
+  // prev in victory path
+  if (
+    victoryPaths[color].includes(prev) &&
+    victoryPaths[color].includes(curr)
+  ) {
+    const startIndex = victoryPaths[color].indexOf(prev);
+    const endIndex = victoryPaths[color].indexOf(curr);
+    return victoryPaths[color].slice(startIndex + 1, endIndex + 1);
+  }
+
+  return [];
+}

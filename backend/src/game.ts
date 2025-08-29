@@ -66,7 +66,7 @@ export class Game {
             console.log("next rool turn id : ",id)
           }
           //broadcast the updated position to all the players
-          this.broadCasting(roomId, player.id, pawn, updatedPosition);
+          this.broadCasting(roomId, player.id,player.color, pawn, updatedPosition);
         }
                               
         // if player in start point
@@ -132,6 +132,7 @@ export class Game {
   private broadCasting(
     roomId: string,
     id: string,
+    color:string,
     pawn: string,
     updatedPosition: string
   ) {
@@ -143,6 +144,7 @@ export class Game {
           payload: {
             roomId: roomId,
             id: id,
+            color:color,
             pawn: pawn,
             pawnPosition: updatedPosition,
             rollTurn: this.rollTurn,
