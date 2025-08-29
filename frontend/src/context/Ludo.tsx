@@ -24,9 +24,11 @@ interface LudoStateType {
   color: string;
   currentTurn: string;
   diceValue: number | null;
-  pawns: {
-    [playerId: string]: { [pawnId: string]: number };
-  };
+  currentMove: {
+    playerId: string;
+    pawnId: string;
+    newPosition: string;
+  } | null;
   rollTurn: string;
   winner: string | null;
 }
@@ -54,7 +56,7 @@ export const LudoStateContextProvider = ({
     color: "",
     currentTurn: "",
     diceValue: null,
-    pawns: {},
+    currentMove: null,
     winner: null,
     rollTurn: "",
   });
@@ -116,6 +118,18 @@ export const LudoStateContextProvider = ({
               diceValue: data.payload.diceValue,
             }));
             break;
+          case "moved_make":
+            if (data.payload.roomId === ludoState.roomId) {
+              setLudoState((curr) => ({
+                ...curr,
+                currentMove: {
+                  playerId: data.payload.id,
+                  pawnId: data.payload.pawn,
+                  newPosition: data.payload.pawnPosition,
+                },
+                rollTurn: data.payload.rollTurn,
+              }));
+            }
         }
       };
     }

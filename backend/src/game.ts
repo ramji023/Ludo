@@ -32,7 +32,7 @@ export class Game {
     });
   }
 
-  makeMove(roomId: string, diceValue: number, pawn: string, player: User) {
+  makeMove(roomId: string, pawn: string, player: User) {
     if (roomId === this.roomId && player.id === this.rollTurn) {
       const currentPlayer = this.players.get(player.id);
       if (currentPlayer) {
@@ -48,11 +48,11 @@ export class Game {
         if (
           pawnPosition &&
           pawnPrevPosition &&
-          isHome(pawnPosition.position, currentPlayer.color) &&
-          diceValue === 6
+          isHome(pawnPosition.position, currentPlayer.color)
         ) {
           // calculate new position
           const updatedPosition = startPoints[currentPlayer.color][0];
+          console.log("updated position",updatedPosition)
           //boadcast the position to all the user
 
           //update the currentposition and prevPosition of pawns
@@ -63,6 +63,7 @@ export class Game {
           const id = this.checkNextTurn(player.id);
           if (id !== -1) {
             this.rollTurn = id;
+            console.log("next rool turn id : ",id)
           }
           //broadcast the updated position to all the players
           this.broadCasting(roomId, player.id, pawn, updatedPosition);
@@ -71,9 +72,9 @@ export class Game {
         // if player in start point
         if (pawnPosition && pawnPrevPosition) {
           const index = isStart(pawnPosition.position, player.color);
-          if (index) {
+          if (index && this.diceValue) {
             // calculate new position
-            const updatedPosition = globalGamePath[index + diceValue];
+            const updatedPosition = globalGamePath[index + this.diceValue];
             //boadcast the position to all the user
 
             //update the currentposition and prevPosition of pawns
@@ -82,11 +83,11 @@ export class Game {
           }
         }
         // if player in path
-        if (pawnPosition && pawnPrevPosition) {
+        if (pawnPosition && pawnPrevPosition && this.diceValue) {
           const index = isPath(pawnPosition.position, currentPlayer.color);
           if (index) {
             // calculate new position
-            const updatedPosition = globalGamePath[index + diceValue];
+            const updatedPosition = globalGamePath[index + this.diceValue];
             //boadcast the position to all the user
 
             //update the currentposition and prevPosition of pawns
@@ -134,6 +135,7 @@ export class Game {
     pawn: string,
     updatedPosition: string
   ) {
+    console.log("broadcasting function called")
     this.players.forEach((player) => {
       player.socket.send(
         JSON.stringify({

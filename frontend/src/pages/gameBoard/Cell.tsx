@@ -32,6 +32,26 @@ export const Cell = ({
     }
   }, [gameContext?.ludoState?.players]);
 
+  // if user click to pawn
+  function makeMove(id: string) {
+    console.log("make move function called")
+    if (
+      gameContext &&
+      gameContext.ludoState?.myPlayerId &&
+      gameContext.ludoState.connection
+    ) {
+      gameContext.ludoState.connection.send(
+        JSON.stringify({
+          type: "make_move",
+          payload: {
+            id: gameContext.ludoState.myPlayerId,
+            roomId: gameContext.ludoState.roomId,
+            pawn: id,
+          },
+        })
+      );
+    }
+  }
   return (
     <div
       id={id}
@@ -43,12 +63,18 @@ export const Cell = ({
       {/* render pawn(s) */}
       <div
         className={`
-    relative w-full h-full flex items-center justify-center
+    relative w-full h-full flex items-center justify-center 
     ${pawnsHere.length > 1 ? "grid grid-cols-2 gap-1" : ""}
   `}
       >
         {pawnsHere.map((pawn, index) => (
-          <Pawn key={pawn.id} color={pawn.color} />
+          <Pawn
+            key={pawn.id}
+            color={pawn.color}
+            onClick={() => 
+              makeMove(pawn.id)
+            }
+          />
         ))}
       </div>
     </div>

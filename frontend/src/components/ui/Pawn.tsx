@@ -1,10 +1,12 @@
-const Pawn = ({ color, size = 40 }: { color: string; size?: number }) => (
+const Pawn = ({ color, size = 40,onClick }: { color: string; size?: number;onClick:()=>void }) => (
   <svg
+    className="cursor-pointer"
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 744.09 1052.4"
     fill={color}
     height={32}
     width={32}
+    onClick={onClick} 
   >
     <path
       d="M304.66 1.7066c-111.06 0-201.06 85.329-201.06 190.64 

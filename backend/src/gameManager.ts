@@ -191,11 +191,13 @@ export class GameManager {
     }
   }
 
+  // when host roll the dice
   rollDice(socket: WebSocket, parsedMessage: any) {
     const payload = parsedMessage.payload;
     const game = this.games.get(payload.roomId);
     if (game && game.players.get(payload.id) && game.rollTurn === payload.id) {
       const newVal = Math.floor(Math.random() * 6) + 1;
+      game.diceValue = newVal;
       game.players.forEach((player) => {
         player.socket.send(
           JSON.stringify({
@@ -213,13 +215,13 @@ export class GameManager {
 
   // when player make move
   makeMove(socket: WebSocket, parsedMessage: any) {
+    console.log("hit the make move  event in server side")
     const payload = parsedMessage.payload;
     /*
     "payload" : {
       "id" : "..."
       "roomId" : "..."
-      "diceValue" : ...
-      "pawns" : ""
+      "pawn" : ""
     }
     */
     const room = this.rooms.get(payload.roomId);
@@ -228,7 +230,8 @@ export class GameManager {
       if (user && user.socket === socket) {
         const game = this.games.get(payload.roomId);
         if (game && !game.isGameOver()) {
-          game.makeMove(payload.roomId, payload.diceValue, payload.pawns, user);
+           console.log("called the makeMove function on server side")
+          game.makeMove(payload.roomId, payload.pawn, user);
         }
       }
     }
