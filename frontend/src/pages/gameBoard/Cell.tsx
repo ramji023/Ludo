@@ -121,7 +121,7 @@ export const Cell = ({
       className={`${cellStyle[type]} w-full h-full flex items-center justify-center relative`}
     >
       {/* safe cell marker */}
-      {safe && <img src="/icons/star.svg" alt="safe" />}
+      {safe && <img src="/icons/star.svg" alt="safe" className="absolute w-full h-full"/>}
 
       {/* render pawn(s) */}
       <div

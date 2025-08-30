@@ -119,8 +119,10 @@ export function isVictoryPath(position: string, color: string) {
 }
 
 export function isStart(position: string, color: string) {
-  const pawnPosition = homePoints[color][0];
+  const pawnPosition = startPoints[color][0];
+  console.log(pawnPosition)
   const globalArrayIndex = globalGamePath.findIndex((path)=>path===pawnPosition)
+  console.log("start point in global array : ",globalArrayIndex)
   if(globalArrayIndex >= 0){
     return globalArrayIndex
   }
