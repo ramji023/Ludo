@@ -212,4 +212,33 @@ export class Game {
       );
     });
   }
+
+  
+  private ifPawnKill(player: User, updatedPosition: string): boolean {
+    let killed = false;
+    const validPlayer = this.players.get(player.id);
+
+    if (validPlayer) {
+      for (const opponentPlayer of this.players.values()) {
+        if (opponentPlayer.id === player.id) continue;
+
+        for (const pawn of opponentPlayer.currentPosition) {
+          if (pawn.position === updatedPosition) {
+            // find free home grid
+            const freeGrid = homePoints[opponentPlayer.color].find(
+              (pos) =>
+                !opponentPlayer.currentPosition.some((p) => p.position === pos)
+            );
+            if (freeGrid) {
+              pawn.position = freeGrid; // send pawn back home
+              killed = true;
+            }
+            break;
+          }
+        }
+        if (killed) break;
+      }
+    }
+    return killed;
+  }
 }

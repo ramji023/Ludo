@@ -27,9 +27,4 @@ export class Room {
   isHost(id: string) {
        return this.hostId === id
   }
-
-  // check if any user dont select same color
-  checkColors() {
-    
-  }
 }
