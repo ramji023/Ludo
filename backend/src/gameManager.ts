@@ -74,10 +74,9 @@ export class GameManager {
     /*
     "payload" : {
       "name" : "Zassicca"
-      "color" : "blue"
     }
     */
-    const user = new User(socket, payload.name, payload.color);
+    const user = new User(socket, payload.name);
 
     console.log("user object after creating room : ", user);
     const room = new Room(user); // create a new room object
@@ -101,13 +100,11 @@ export class GameManager {
     /*
     "payload" : {
       "name" : "Bob"
-      "color" : "green"
       "roomId" : "..."
     }
     */
-
     // check user is joinee or host
-    const user = new User(socket, payload.name, payload.color);
+    const user = new User(socket, payload.name);
     console.log("user object after joining room : ", user);
 
     const room = this.rooms.get(payload.roomId);

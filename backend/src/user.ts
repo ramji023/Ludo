@@ -11,13 +11,18 @@ export class User {
   constructor(
     socket: WebSocket,
     name: string,
-    color: string,
   ) {
     this.socket = socket;
     this.id = uuidv4();
     this.name = name;
-    this.color = color;
-    homePoints[color].map((pos, index) => {
+    this.color = ""
+  }
+
+}
+
+/**
+ * 
+ * homePoints[color].map((pos, index) => {
       const newObject = {
         pawns: `${this.color[0]}${index}`,
         position: pos,
@@ -25,6 +30,4 @@ export class User {
       this.currentPosition.push(newObject);
     });
     this.prevPosition = [...this.currentPosition];
-  }
-
-}
+ */

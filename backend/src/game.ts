@@ -12,6 +12,8 @@ import {
   startPoints,
 } from "./utils/grid";
 import { MOVED_MAKE } from "./messages";
+
+const color: string[] = ["red", "blue", "green", "yellow"]; // color order
 export class Game {
   public roomId: string;
   public diceValue: number | null;
@@ -24,12 +26,44 @@ export class Game {
     this.rollTurn = null;
   }
 
+  private assignColor(allPlayers: Map<string, User>) {
+    let index = 0;
+    if (allPlayers.size === 2) {
+      allPlayers.forEach((player) => {
+        player.color = color[index];
+        index += 2;
+      });
+    } else {
+      allPlayers.forEach((player) => {
+        player.color = color[index];
+        index++;
+      });
+      return;
+    }
+  }
+
+  private initializePosition(allPlayers: Map<string, User>) {
+    allPlayers.forEach((player) => {
+      const position = homePoints[player.color].map((pos, index) => {
+        const newObject = {
+          pawns: `${player.color[0]}${index}`,
+          position: pos,
+        };
+        return newObject;
+      });
+      player.currentPosition = position;
+      player.prevPosition = position;
+    });
+  }
+
   startGame(roomId: string, id: string, allPlayers: Map<string, User>) {
     this.roomId = roomId;
     this.rollTurn = id;
     allPlayers.forEach((player) => {
       this.players.set(player.id, player);
     });
+    this.assignColor(allPlayers);
+    this.initializePosition(allPlayers);
   }
 
   makeMove(roomId: string, pawn: string, player: User) {
@@ -49,65 +83,46 @@ export class Game {
           // if player in home area
           if (isHome(pawnPosition.position, currentPlayer.color)) {
             // calculate new position
-            const updatedPosition = startPoints[currentPlayer.color][0];
-            console.log("updated position", updatedPosition);
-            //boadcast the position to all the user
+            if (this.diceValue === 6) {
+              const updatedPosition = startPoints[currentPlayer.color][0];
+              console.log("updated position", updatedPosition);
 
-            //update the currentposition and prevPosition of pawns
-            pawnPrevPosition.position = pawnPosition.position;
-            pawnPosition.position = updatedPosition;
+              //update the currentposition and prevPosition of pawns
+              pawnPrevPosition.position = pawnPosition.position;
+              pawnPosition.position = updatedPosition;
 
-            //updated the roll turn
-            const id = this.checkNextTurn(player.id);
-            if (id !== -1) {
-              this.rollTurn = id;
-              console.log("next rool turn id : ", id);
+              //updated the roll turn
+              const id = this.checkNextTurn(player.id);
+              if (id !== -1) {
+                this.rollTurn = id;
+                console.log("next rool turn id : ", id);
+              }
+              //broadcast the updated position to all the players
+              this.broadCasting(
+                roomId,
+                player.id,
+                player.color,
+                pawn,
+                updatedPosition
+              );
+              return;
+            } else {
+              //updated the roll turn
+              const id = this.checkNextTurn(player.id);
+              if (id !== -1) {
+                this.rollTurn = id;
+                console.log("next rool turn id : ", id);
+              }
+              //broadcast the updated position to all the players
+              this.broadCasting(
+                roomId,
+                player.id,
+                player.color,
+                pawn,
+                pawnPosition.position
+              );
             }
-            //broadcast the updated position to all the players
-            this.broadCasting(
-              roomId,
-              player.id,
-              player.color,
-              pawn,
-              updatedPosition
-            );
-            return;
-          }
-          // if player in start point
-          // else if (isStart(pawnPosition.position, player.color) !== null) {
-          //   const index = isStart(pawnPosition.position, player.color);
-          //   console.log("start index of isStart functioN: ", index);
-          //   if (index!==null && this.diceValue) {
-          //     console.log("come into index function")
-          //     // calculate new position
-          //     const updatedPosition = globalGamePath[index + this.diceValue];
-          //     console.log("updated Position are : ",updatedPosition)
-          //     //boadcast the position to all the user
-
-          //     //update the currentposition and prevPosition of pawns
-          //     pawnPrevPosition.position = pawnPosition.position;
-          //     pawnPosition.position = updatedPosition;
-
-          //     //updated the roll turn
-          //     const id = this.checkNextTurn(player.id);
-          //     if (id !== -1) {
-          //       this.rollTurn = id;
-          //       console.log("next rool turn id : ", id);
-          //     }
-          //     //broadcast the updated position to all the players
-          //     this.broadCasting(
-          //       roomId,
-          //       player.id,
-          //       player.color,
-          //       pawn,
-          //       updatedPosition
-          //     );
-
-          //     return;
-          //   }
-          // }
-          // if player in global path
-          else if (
+          } else if (
             isPath(pawnPosition.position, currentPlayer.color) !== null
           ) {
             const index = isPath(pawnPosition.position, currentPlayer.color);
@@ -140,36 +155,6 @@ export class Game {
             }
           }
         }
-
-        // if player in global path
-        // if (pawnPosition && pawnPrevPosition && this.diceValue) {
-        //   const index = isPath(pawnPosition.position, currentPlayer.color);
-        //   if (index) {
-        //     // calculate new position
-        //     const updatedPosition = globalGamePath[index + this.diceValue];
-        //     //boadcast the position to all the user
-
-        //     //update the currentposition and prevPosition of pawns
-        //     pawnPrevPosition.position = pawnPosition.position;
-        //     pawnPosition.position = updatedPosition;
-        //     //updated the roll turn
-        //     const id = this.checkNextTurn(player.id);
-        //     if (id !== -1) {
-        //       this.rollTurn = id;
-        //       console.log("next rool turn id : ", id);
-        //     }
-        //     //broadcast the updated position to all the players
-        //     this.broadCasting(
-        //       roomId,
-        //       player.id,
-        //       player.color,
-        //       pawn,
-        //       updatedPosition
-        //     );
-        //     return;
-        //   }
-        // }
-
         // if player in victory path
         if (
           pawnPosition &&
@@ -185,6 +170,7 @@ export class Game {
       }
     }
   }
+
   // check game is over or not
   isGameOver() {
     return false;
@@ -192,13 +178,12 @@ export class Game {
 
   // assign nextTurn after making move
   private checkNextTurn(id: string) {
+    if (this.diceValue === 6) return id; // if dice value 6 then dont change roll turn
     const ids = Array.from(this.players.keys());
     const index = ids.indexOf(id);
-
     if (index >= 0) {
       return ids[(index + 1) % ids.length];
     }
-
     return -1;
   }
 
