@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { useContext, useEffect, useState } from "react";
 import { ludoStateContext } from "../../context/Ludo";
+import { homePoints } from "../../game_grids/grids";
 const diceDotPositions: Record<number, string[]> = {
   1: ["center"],
   2: ["top-left", "bottom-right"],
@@ -62,7 +63,7 @@ export const Dice = ({
 
   useEffect(() => {
     if (
-      isRolled && 
+      isRolled &&
       ludoState &&
       ludoState.ludoState &&
       ludoState.ludoState.diceValue !== null
@@ -74,6 +75,27 @@ export const Dice = ({
         setIsRolling(false);
         onRoll(newVal);
       }, 600);
+
+      const player = ludoState?.ludoState.players.find(
+        (p) => p.id === playerId
+      );
+      const allInHome = player
+        ? player.pawns.every((pawn) =>
+            homePoints[player.color].includes(pawn.position)
+          )
+        : false;
+
+      if (allInHome && newVal!==6 && isActive) {
+        socket?.send(
+          JSON.stringify({
+            type: "skip_move",
+            payload: {
+              id: playerId,
+              roomId : roomId
+            },
+          })
+        );
+      }
     }
   }, [ludoState?.ludoState?.diceValue]);
   return (

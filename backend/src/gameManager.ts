@@ -4,10 +4,12 @@ import {
   GAME_STARTED,
   JOIN_ROOM,
   MAKE_MOVE,
+  MOVE_SKIPED,
   ROLL_DICE,
   ROLLED_DICE,
   ROOM_CREATED,
   ROOM_JOINED,
+  SKIP_MOVE,
   START_GAME,
 } from "./messages";
 import { User } from "./user";
@@ -64,6 +66,10 @@ export class GameManager {
       // if player make move
       if (parsedMessage.type === MAKE_MOVE) {
         this.makeMove(socket, parsedMessage);
+      }
+      // if plyer skip move
+      if (parsedMessage.type === SKIP_MOVE) {
+        this.skipMove(socket, parsedMessage);
       }
     });
   }
@@ -212,7 +218,7 @@ export class GameManager {
 
   // when player make move
   makeMove(socket: WebSocket, parsedMessage: any) {
-    console.log("hit the make move  event in server side")
+    console.log("hit the make move  event in server side");
     const payload = parsedMessage.payload;
     /*
     "payload" : {
@@ -227,9 +233,36 @@ export class GameManager {
       if (user && user.socket === socket) {
         const game = this.games.get(payload.roomId);
         if (game && !game.isGameOver()) {
-           console.log("called the makeMove function on server side")
+          console.log("called the makeMove function on server side");
           game.makeMove(payload.roomId, payload.pawn, user);
         }
+      }
+    }
+  }
+
+  // if client dont make move
+  skipMove(socket: WebSocket, parsedMessage: any) {
+    const payload=  parsedMessage.payload;
+    console.log("parsed message in skipMove : ",payload)
+    const playerId = payload.id;
+    const game = this.games.get(payload.roomId);
+    console.log("game in skipped move function : ",game)
+    if (game && game.players.get(playerId)) {
+      console.log("player in skipped move : ",game.players.get(playerId))
+      const id = game.checkNextTurn(playerId);
+      console.log("id in next turn in skipped move : ",id)
+      if (id !== -1) {
+        game.rollTurn = id;
+        game.players.forEach((player) => {
+          player.socket.send(
+            JSON.stringify({
+              type: MOVE_SKIPED,
+              payload: {
+                nextTurn: game.rollTurn,
+              },
+            })
+          );
+        });
       }
     }
   }

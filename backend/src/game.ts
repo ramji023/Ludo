@@ -10,6 +10,7 @@ import {
   isVictory,
   isVictoryPath,
   startPoints,
+  victoryBox,
 } from "./utils/grid";
 import { MOVED_MAKE } from "./messages";
 
@@ -86,7 +87,6 @@ export class Game {
             if (this.diceValue === 6) {
               const updatedPosition = startPoints[currentPlayer.color][0];
               console.log("updated position", updatedPosition);
-
               //update the currentposition and prevPosition of pawns
               pawnPrevPosition.position = pawnPosition.position;
               pawnPosition.position = updatedPosition;
@@ -134,11 +134,14 @@ export class Game {
                 "updated position in global path path array : ",
                 updatedPosition
               );
+              //check if any pawn is killed or not
+              const killed = this.ifPawnKill(player, updatedPosition);
+
               //update the currentposition and prevPosition of pawns
               pawnPrevPosition.position = pawnPosition.position;
               pawnPosition.position = updatedPosition;
               //updated the roll turn
-              const id = this.checkNextTurn(player.id);
+              const id = this.checkNextTurn(player.id, killed);
               if (id !== -1) {
                 this.rollTurn = id;
                 console.log("next rool turn id : ", id);
@@ -172,13 +175,27 @@ export class Game {
   }
 
   // check game is over or not
-  isGameOver() {
-    return false;
+  isGameOver(): boolean {
+    let completedCount = 0;
+
+    for (const [, player] of this.players) {
+      if (this.isPlayerCompleted(player)) {
+        completedCount++;
+      }
+    }
+    return completedCount >= 3;
+  }
+
+  // check if a single player has all pawns in victory box
+  private isPlayerCompleted(player: User): boolean {
+    return victoryBox[player.color].every((pos) =>
+      player.currentPosition.some((p) => p.position === pos)
+    );
   }
 
   // assign nextTurn after making move
-  private checkNextTurn(id: string) {
-    if (this.diceValue === 6) return id; // if dice value 6 then dont change roll turn
+  checkNextTurn(id: string, killed?: boolean) {
+    if (this.diceValue === 6 || killed) return id; // if dice value 6 then dont change roll turn
     const ids = Array.from(this.players.keys());
     const index = ids.indexOf(id);
     if (index >= 0) {
@@ -213,7 +230,6 @@ export class Game {
     });
   }
 
-  
   private ifPawnKill(player: User, updatedPosition: string): boolean {
     let killed = false;
     const validPlayer = this.players.get(player.id);

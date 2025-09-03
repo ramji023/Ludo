@@ -119,9 +119,15 @@ export const LudoStateContextProvider = ({
               diceValue: data.payload.diceValue,
             }));
             break;
+          case "skipped_move":
+            setLudoState((curr) => ({
+              ...curr,
+              rollTurn: data.payload.nextTurn,
+            }));
+            break;
           case "moved_make":
             setLudoState((curr) => {
-              if (data.payload.roomId !== curr.roomId) return curr; 
+              if (data.payload.roomId !== curr.roomId) return curr;
               return {
                 ...curr,
                 currentMove: {
@@ -133,6 +139,7 @@ export const LudoStateContextProvider = ({
                 rollTurn: data.payload.rollTurn,
               };
             });
+            break;
         }
       };
     }

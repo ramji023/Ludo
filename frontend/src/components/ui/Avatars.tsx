@@ -65,10 +65,14 @@ function makeAvatars(): Avatar[] {
 }
 
 // -------- Main Component --------
-export const AvatarBox = () => {
+export const AvatarBox = ({
+  close,
+}: {
+  close: React.Dispatch<React.SetStateAction<boolean>>;
+}) => {
   const avatarArray = makeAvatars();
   return (
-    <div >
+    <div>
       <div className="mb-4 p-5  flex flex-wrap gap-4 justify-center max-h-20 overflow-y-auto">
         {avatarArray.map((a) => (
           <img
@@ -77,6 +81,10 @@ export const AvatarBox = () => {
             alt={a.id}
             width={80}
             height={80}
+            onClick={() => {
+              sessionStorage.setItem("avatar", a.url);
+              close((curr) => !curr);
+            }}
             className="rounded-full object-cover cursor-pointer hover:scale-110 transition"
           />
         ))}
