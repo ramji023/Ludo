@@ -242,15 +242,15 @@ export class GameManager {
 
   // if client dont make move
   skipMove(socket: WebSocket, parsedMessage: any) {
-    const payload=  parsedMessage.payload;
-    console.log("parsed message in skipMove : ",payload)
+    const payload = parsedMessage.payload;
+    console.log("parsed message in skipMove : ", payload);
     const playerId = payload.id;
     const game = this.games.get(payload.roomId);
-    console.log("game in skipped move function : ",game)
+    console.log("game in skipped move function : ", game);
     if (game && game.players.get(playerId)) {
-      console.log("player in skipped move : ",game.players.get(playerId))
+      console.log("player in skipped move : ", game.players.get(playerId));
       const id = game.checkNextTurn(playerId);
-      console.log("id in next turn in skipped move : ",id)
+      console.log("id in next turn in skipped move : ", id);
       if (id !== -1) {
         game.rollTurn = id;
         game.players.forEach((player) => {
