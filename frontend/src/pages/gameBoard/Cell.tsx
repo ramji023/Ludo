@@ -3,6 +3,7 @@ import { ludoStateContext } from "../../context/Ludo";
 import { useContext, useEffect, useState } from "react";
 import Pawn from "../../components/ui/Pawn";
 import { getMovementPath } from "../../game_grids/grids";
+import { useSound } from "../../hooks/useSound";
 
 export const Cell = ({
   type,
@@ -13,6 +14,10 @@ export const Cell = ({
   type: string;
   safe?: string;
 }) => {
+  // play move sound
+  const { playSound,stopSound } = useSound(
+    "https://res.cloudinary.com/dqr7qcgch/video/upload/v1756987210/Snake_Hiss_4_-_QuickSounds.com_ypwaqg.mp3"
+  );
   const gameContext = useContext(ludoStateContext);
 
   const [movementPath, setMovementPath] = useState<string[] | undefined>(
@@ -48,6 +53,7 @@ export const Cell = ({
       gameContext.ludoState?.myPlayerId &&
       gameContext.ludoState.connection
     ) {
+       playSound()
       gameContext.ludoState.connection.send(
         JSON.stringify({
           type: "make_move",
@@ -70,6 +76,7 @@ export const Cell = ({
       gameContext.ludoState &&
       gameContext.ludoState.currentMove !== null
     ) {
+      
       const currentMove = gameContext.ludoState.currentMove;
       const pawn = gameContext.ludoState.players
         .flatMap((player) => player.pawns)
@@ -95,7 +102,7 @@ export const Cell = ({
     const currentMove = gameContext?.ludoState?.currentMove;
 
     if (!currentMove) return;
-
+stopSound()
     gameContext?.setLudoState((curr) => ({
       ...curr,
       players: curr.players.map((player) => {
@@ -121,7 +128,13 @@ export const Cell = ({
       className={`${cellStyle[type]} w-full h-full flex items-center justify-center relative`}
     >
       {/* safe cell marker */}
-      {safe && <img src="/icons/star.svg" alt="safe" className="absolute w-full h-full"/>}
+      {safe && (
+        <img
+          src="/icons/star.svg"
+          alt="safe"
+          className="absolute w-full h-full"
+        />
+      )}
 
       {/* render pawn(s) */}
       <div

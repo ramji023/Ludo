@@ -1,10 +1,23 @@
-import {motion} from "motion/react"
+import { motion } from "motion/react";
 import { useEffect } from "react";
 import { ludoStateContext } from "../../context/Ludo";
 import { useContext } from "react";
 import { useNavigate } from "react-router-dom";
+import { useSound } from "../../hooks/useSound";
 
 export default function Lobby() {
+  // play the lobby sound
+  const { playSound, stopSound } = useSound(
+    "https://res.cloudinary.com/dqr7qcgch/video/upload/v1756981644/lobbySound_vufxrq.mp3",
+    { loop: true }
+  );
+  useEffect(() => {
+    playSound();
+    return () => {
+      stopSound();
+    };
+  }, []);
+
   const navigate = useNavigate();
   const ludoState = useContext(ludoStateContext);
 

@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { useContext, useEffect, useState } from "react";
 import { ludoStateContext } from "../../context/Ludo";
 import { homePoints } from "../../game_grids/grids";
+import { useSound } from "../../hooks/useSound";
 const diceDotPositions: Record<number, string[]> = {
   1: ["center"],
   2: ["top-left", "bottom-right"],
@@ -43,13 +44,18 @@ export const Dice = ({
   roomId,
   socket,
 }: DicePropType) => {
+  // play the rolling sound
+  const { playSound, stopSound } = useSound(
+    "https://res.cloudinary.com/dqr7qcgch/video/upload/v1756981643/rolling_cssnt7.mp3"
+  );
+
   const ludoState = useContext(ludoStateContext);
   const [value, setValue] = useState<number>(1);
   const [isRolling, setIsRolling] = useState<boolean>(false);
 
   const roll = () => {
     if (!isActive || isRolling) return;
-
+    playSound();  // play the sound
     socket?.send(
       JSON.stringify({
         type: "roll_dice",
@@ -85,13 +91,13 @@ export const Dice = ({
           )
         : false;
 
-      if (allInHome && newVal!==6 && isActive) {
+      if (allInHome && newVal !== 6 && isActive) {
         socket?.send(
           JSON.stringify({
             type: "skip_move",
             payload: {
               id: playerId,
-              roomId : roomId
+              roomId: roomId,
             },
           })
         );

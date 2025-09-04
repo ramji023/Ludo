@@ -2,8 +2,20 @@ import { Board } from "./Board";
 import { Dice } from "../../components/ui/Dice"; // your dice component
 import { useContext, useEffect, useState } from "react";
 import { ludoStateContext } from "../../context/Ludo";
-import { img } from "motion/react-client";
+import { useSound } from "../../hooks/useSound";
 export default function GameBoard() {
+  // play the rolling sound
+  const { playSound, stopSound } = useSound(
+    "https://res.cloudinary.com/dqr7qcgch/video/upload/v1756981643/start_mudwqg.mp3"
+  );
+  useEffect(() => {
+    playSound();
+    return () => {
+      stopSound();
+    };
+  }, []);
+
+
   const gameState = useContext(ludoStateContext);
   const [activePlayer, setActivePlayer] = useState("");
   const [players, setPlayers] = useState<

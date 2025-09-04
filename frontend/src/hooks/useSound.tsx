@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 
-export default function useSound(audioFile: string, { loop = false } = {}) {
+export function useSound(audioFile: string, { loop = false } = {}) {
   const soundRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
