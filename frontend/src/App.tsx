@@ -5,13 +5,15 @@ import Register from "./pages/auth/Register";
 import { CreateRoom } from "./pages/auth/CreateRoom";
 import { JoinRoom } from "./pages/auth/JoinRoom";
 import useSocketStore from "./store/SocketStore";
+// import { simulateGameEnded, simulateGameWon } from "./store/test";
 
 if (import.meta.env.MODE === "development") {
   (window as any).__store = useSocketStore;
 }
 
-
 function App() {
+  // simulateGameWon();
+  // simulateGameEnded();
   return (
     <>
       <BrowserRouter>
@@ -20,10 +22,10 @@ function App() {
             <Route index element={<Register />} />
             {/* <Route path="create-room-form" element={<CreateRoomForm />} />
             <Route path="join-room-form" element={<JoinRoomForm/>} /> */}
-            <Route path="create-room" element={<CreateRoom/>} />
-            <Route path="join-room" element={<JoinRoom/>} />
+            <Route path="create-room" element={<CreateRoom />} />
+            <Route path="join-room" element={<JoinRoom />} />
           </Route>
-          <Route path="game" element={<Game/>} />
+          <Route path="game" element={<Game />} />
         </Routes>
       </BrowserRouter>
     </>

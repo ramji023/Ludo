@@ -5,26 +5,24 @@ import PawnPath from "../../components/ludo/PawnPath";
 import VictoryBox from "../../components/ludo/victoryBox";
 import PlayerBox from "../../components/ludo/PlayerBox";
 import useSocketStore from "../../store/SocketStore";
-// export const playerBoxPosition = {
-//   blue: "top-left",
-//   yellow: "top-right",
-//   red: "bottom-left",
-//   green: "bottom-right",
-// };
+import { GameEnd } from "../../components/badges/GameEnd";
+
+
 export default function Board() {
+  const gameStatus = useSocketStore((s) => s.gameStatus);
   const players = useSocketStore((s) => s.players);
   if (!players) return null;
 
   const getPlayerByColor = (color: string) => {
     const player = players.find((p) => p.color === color);
-    return player ? { id: player.id } : undefined;
+    return player ? { id: player.id,username:player.username } : undefined;
   };
 
   return (
     <div className="flex items-center justify-center min-h-screen">
       <div className="relative">
         <svg
-         data-testid="game-board"
+          data-testid="game-board"
           width="600"
           height="600"
           viewBox="0 0 600 600"

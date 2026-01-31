@@ -1,269 +1,588 @@
+import { broadcast, sendMessage } from "./broadcaster";
+import {
+  ALL_PLAYERS,
+  CREATE_ROOM,
+  DICE_ROLLED,
+  GAME_END,
+  GAME_STARTED,
+  GAME_WON,
+  MADE_MOVE,
+  PAWN_KILLED,
+  PLAYER_JOINED,
+  SEND_CHAT_MESSAGE,
+  TURN_UPDATED,
+  UPDATE_PLAYERS,
+} from "./events";
+import Game from "./game";
+import User from "./user";
 import { WebSocket } from "ws";
 import {
-  CREATE_ROOM,
-  GAME_STARTED,
-  JOIN_ROOM,
-  MAKE_MOVE,
-  MOVE_SKIPED,
-  ROLL_DICE,
-  ROLLED_DICE,
-  ROOM_CREATED,
-  ROOM_JOINED,
-  SKIP_MOVE,
-  START_GAME,
-} from "./messages";
-import { User } from "./user";
-import { Room } from "./room";
-import { Game } from "./game";
+  createMovementPath,
+  createMovementPathForVictory,
+  findStart,
+  isInHome,
+  isInMainPath,
+  isInVictoryPath,
+} from "./utils/helperFn";
+import { pawnPosition, victoryPathMap } from "./utils/pawnPath";
+
 export class GameManager {
-  private rooms: Map<string, Room>;
-  private users: WebSocket[];
-  private games: Map<string, Game>;
+  private User: Map<string, User>;
+  private Game: Map<string, Game>;
+
   constructor() {
-    this.rooms = new Map();
-    this.users = [];
-    this.games = new Map();
+    this.User = new Map();
+    this.Game = new Map();
   }
 
-  addUser(socket: WebSocket) {
-    this.users.push(socket);
-    socket.send(JSON.stringify({ msg: "user added to the server" }));
-    this.addHandler(socket);
-  }
+  // handle to adding host
+  addHost(username: string, socket: WebSocket) {
+    console.log("Hit add host end point");
+    const user = new User(username, "host", socket); // initialize a new user as a host
+    // if user successfully created then initialize a new game
+    if (user) {
+      const game = new Game(user); // then initialize a new game with "create" status
 
-  private addHandler(socket: WebSocket) {
-    // user send an event to server
-    socket.on("message", (message) => {
-      const parsedMessage = JSON.parse(message.toString());
-      /* 
-      parsedMessage = {
-           "type" : "create_room",
-           "payload" : {
-             
-           }
-      }
-           */
+      // assign the color to player
+      user.color = game.colors[0]; // assign first color
+      // then remove that first color from game.colors
+      game.colors.splice(0, 1);
+      // store user and game in single record
+      this.User.set(user.id, user);
+      this.Game.set(game.gameId, game);
 
-      // if host send create room event
-      if (parsedMessage.type === CREATE_ROOM) {
-        this.createRoom(socket, parsedMessage);
-      }
-
-      // if player send join room event
-      if (parsedMessage.type === JOIN_ROOM) {
-        this.joinRoom(socket, parsedMessage);
-      }
-
-      // if host start the game
-      if (parsedMessage.type === START_GAME) {
-        this.startGame(socket, parsedMessage);
-      }
-
-      // if player roll dice
-      if (parsedMessage.type === ROLL_DICE) {
-        this.rollDice(socket, parsedMessage);
-      }
-      // if player make move
-      if (parsedMessage.type === MAKE_MOVE) {
-        this.makeMove(socket, parsedMessage);
-      }
-      // if plyer skip move
-      if (parsedMessage.type === SKIP_MOVE) {
-        this.skipMove(socket, parsedMessage);
-      }
-    });
-  }
-
-  // when host create the room
-  createRoom(socket: WebSocket, parsedMessage: any) {
-    const payload = parsedMessage.payload;
-    /*
-    "payload" : {
-      "name" : "Zassicca"
+      // send the message to that host about successfully create game and user
+      const msgData = {
+        type: CREATE_ROOM,
+        message: "room has been created successfully",
+        data: {
+          username: user.username,
+          id: user.id,
+          type: user.type,
+          color: user.color,
+          gameId: game.gameId,
+          Gametatus: game.status,
+          players: game.playerData(),
+        },
+      };
+      sendMessage(user, msgData);
     }
-    */
-    const user = new User(socket, payload.name);
-
-    console.log("user object after creating room : ", user);
-    const room = new Room(user); // create a new room object
-    console.log("room object after creating room : ", room);
-    // room.initializeRoom(payload.id, user);
-    this.rooms.set(room.roomId, room); // set the new room in game manager class
-
-    //broadcast room created event to client
-    socket.send(
-      JSON.stringify({
-        type: ROOM_CREATED,
-        payload: { roomId: room.roomId, userId: user.id },
-        message: `${user.name} has joined the game`,
-      })
-    );
   }
 
-  // when someone join the room
-  joinRoom(socket: WebSocket, parsedMessage: any) {
-    const payload = parsedMessage.payload;
-    /*
-    "payload" : {
-      "name" : "Bob"
-      "roomId" : "..."
-    }
-    */
-    // check user is joinee or host
-    const user = new User(socket, payload.name);
-    console.log("user object after joining room : ", user);
+  // handle to adding user
+  addUser(username: string, game: Game, socket: WebSocket) {
+    const user = new User(username, "player", socket); // initialize a new user as a player
+    // if user successfully created then add user in an existing game
+    if (user) {
+      // assign the color to player
+      user.color = game.colors[0]; // assign first color
+      // then remove that first color from game.colors
+      game.colors.splice(0, 1);
+      // store user in single record
+      this.User.set(user.id, user);
+      // add this user in game object
+      game.addPlayer(user);
 
-    const room = this.rooms.get(payload.roomId);
-    if (room) {
-      room.addPlayer(user);
-      //broadcast joined room event to client
-      room?.players.forEach((player, playerId) => {
-        player.socket.send(
-          JSON.stringify({
-            type: ROOM_JOINED,
-            payload: {
-              id: user.id,
-              roomId: room.roomId,
-            },
-            message: `${user.name} has joined the game`,
-          })
-        );
-      });
+      // send the message to that host about successfully added in game
+      const msgData = {
+        type: PLAYER_JOINED,
+        message: "player has been added in game successfully",
+        data: {
+          username: user.username,
+          id: user.id,
+          type: user.type,
+          color: user.color,
+          gameId: game.gameId,
+          Gametatus: game.status,
+          players: game.playerData(),
+        },
+      };
+      sendMessage(user, msgData);
+
+      // and then broadcast message to every player to tell that a player has joined the game
+      const msg = {
+        type: ALL_PLAYERS,
+        message: "all players data",
+        data: {
+          players: game.playerData(),
+        },
+      };
+      broadcast(game.players, msg);
     }
-    console.log("room object after joining room : ", room);
   }
 
-  // when host start to play game
-  startGame(socket: WebSocket, parsedMessage: any) {
-    const payload = parsedMessage.payload;
-    /*
-    "payload" : {
-      "id" : "..."
-      "roomId" : "..."
-    }
-    */
-    //  console.log("hit the start game checkpoint 0")
-    const room = this.rooms.get(payload.roomId);
-    //  console.log("hit the start game checkpoint 1",room)
-    // check if user is host or not
-    if (room && room.isHost(payload.id)) {
-      // console.log("hit the start game checkpoint 2")
-      // check there should be 4 player
-      // if (!room.canStart()) {
-      //   return;
-      // }
-      console.log("hit the start game checkpoint 3");
-      room.status = "playing";
-      const users = room.players;
-      if (users) {
-        const game = new Game();
-        game.startGame(payload.roomId, payload.id, users);
-        this.games.set(payload.roomId, game);
-        console.log("game object after starting the game : ", game);
+  //  function to handle all messages events
+  handleMessages(socket: WebSocket, data: string) {
+    try {
+      const parsedMessageObject = JSON.parse(data);
 
-        //broadcast start game event to all the players
-        interface playerArray {
-          id: string;
-          name: string;
-          color: string;
-          currentpawnsPosition: {
-            pawns: string;
-            position: string;
-          }[];
+      // first check that user is valid and gameId is valid
+      const user = this.User.get(parsedMessageObject.data.id);
+      const game = this.Game.get(parsedMessageObject.data.gameId);
+
+      if (user && game) {
+        switch (parsedMessageObject.type) {
+          // if client send message event to server
+          case "start_game":
+            // then start the game
+            if (user.type === "host") {
+              game.startGame();
+              //  after start the game send players data and currentplayer turn and Gametatus to all the players
+              const msg = {
+                type: GAME_STARTED,
+                message: "Game has been started",
+                data: {
+                  players: game.playerData(),
+                  currentPlayerTurn:
+                    game.currentPlayerTurn[game.currentTurnIndex],
+                  Gametatus: game.status,
+                },
+              };
+              broadcast(game.players, msg);
+            }
+            break;
+
+          case "roll_dice":
+            // first check that current user turn match with given user id
+            if (user.id === game.currentPlayerTurn[game.currentTurnIndex]) {
+              // if it is matched then calculate dice value
+              const value = Math.floor(Math.random() * 6) + 1;
+              game.currentDiceValue = value; // set the dice value
+              // game.currentDiceValue = user.color === "blue" ? 56 : 58;
+
+              // now broadcast the active dice value to all players
+              const msg = {
+                type: DICE_ROLLED,
+                message: "dice value has been calculated",
+                data: {
+                  diceValue: game.currentDiceValue,
+                },
+              };
+              broadcast(game.players, msg);
+            }
+            break;
+
+          case "make_move":
+            // first check that current user turn match with given user id
+            if (user.id === game.currentPlayerTurn[game.currentTurnIndex]) {
+              // if it matched then calculate steps and new position of that pawn
+              // and update the pawn position of that player
+              const playerColor: string = user.color as string; // store player color
+              const pawnId: string = parsedMessageObject.data.pawnId; // store pawnId
+              // and then store pawn position
+              const currentPawnPositon: {
+                x: number;
+                y: number;
+                index: number;
+              } = parsedMessageObject.data.position;
+
+              // <---------------------------------------------- first check that pawn is in home or not   --------------------------------------------------->
+              // now first check if pawn in homeBase or not
+              const result = isInHome(playerColor, pawnId, currentPawnPositon);
+              console.log("pawn is in home or not : ", result);
+              // if pawn is in home then move to that pawn to start position
+              if (result) {
+                // pawn is in start position - check if dice rolled a 6
+                if (game.currentDiceValue !== 6) {
+                  // dice wasn't 6, so move to next player without sending movement
+                  game.currentTurnIndex =
+                    (game.currentTurnIndex + 1) % game.currentPlayerTurn.length;
+                  game.currentDiceValue = -1;
+
+                  const msgData = {
+                    type: UPDATE_PLAYERS,
+                    message: "dice not 6, moving to next player",
+                    data: {
+                      players: game.playerData(),
+                      currentPlayerTurn:
+                        game.currentPlayerTurn[game.currentTurnIndex],
+                      Gametatus: game.status,
+                    },
+                  };
+                  broadcast(game.players, msgData);
+                  return; // Important: exit here
+                }
+                // code here
+                const newPosition = findStart(playerColor, pawnId); // find the start position of a perticular player
+                // if newPosition is valid then send updated value to client
+
+                // first store fromPosition and toPosition
+                game.fromPosition = {
+                  x: parsedMessageObject.data.position.x,
+                  y: parsedMessageObject.data.position.y,
+                  index: parsedMessageObject.data.position.index,
+                  playerId: user.id,
+                  pawnId: parsedMessageObject.data.pawnId,
+                  color: user.color as string,
+                };
+                game.toPosition = {
+                  x: newPosition.x as number,
+                  y: newPosition.y as number,
+                  index: newPosition.index as number,
+                  playerId: user.id,
+                  pawnId: parsedMessageObject.data.pawnId,
+                  color: user.color as string,
+                };
+                if (newPosition) {
+                  const msgData = {
+                    type: MADE_MOVE,
+                    message:
+                      "pawn movement from home --- > start send successfully",
+                    data: {
+                      playerId: user.id,
+                      gameId: game.gameId,
+                      pawnId: pawnId,
+                      movement: [currentPawnPositon, newPosition],
+                    },
+                  };
+                  broadcast(game.players, msgData);
+                  return;
+                }
+              }
+
+              // <-------------------------------------------    if pawn is not in home then  ---------------------------->
+              const pos = isInMainPath(playerColor, pawnId, currentPawnPositon);
+              console.log("this pawn is in main path : ", pos);
+              // if pawn is in main path
+              if (
+                typeof pos === "number" &&
+                pos !== -1 &&
+                pos !== null &&
+                pos !== undefined
+              ) {
+                // first store all the movements in an array
+                const movementsPath = createMovementPath(
+                  pos,
+                  game.currentDiceValue,
+                  playerColor,
+                );
+                console.log(
+                  "movement path if pawn is in main path : ",
+                  movementsPath,
+                );
+                if (movementsPath) {
+                  // now store it in fromPosition(start point) and toPosition(end point) in in-memory
+                  game.toPosition = {
+                    x: movementsPath[movementsPath.length - 1].x,
+                    y: movementsPath[movementsPath.length - 1].y,
+                    index: movementsPath[movementsPath.length - 1].index,
+                    playerId: user.id,
+                    pawnId: parsedMessageObject.data.pawnId,
+                    color: user.color as string,
+                  };
+                  game.fromPosition = {
+                    x: parsedMessageObject.data.position.x,
+                    y: parsedMessageObject.data.position.y,
+                    index: parsedMessageObject.data.position.index,
+                    playerId: user.id,
+                    pawnId: parsedMessageObject.data.pawnId,
+                    color: user.color as string,
+                  };
+
+                  // and then broadcast the message to all players
+
+                  const msgData = {
+                    type: MADE_MOVE,
+                    message:
+                      "pawn movement data from mainPath ----> mainPath send successfully",
+                    data: {
+                      playerId: user.id,
+                      gameId: game.gameId,
+                      pawnId: pawnId,
+                      movement: movementsPath,
+                    },
+                  };
+                  broadcast(game.players, msgData);
+                  return;
+                }
+              }
+
+              // <---------------------------------  check if pawn is in the victory path  ------------------------>
+              const victoryPos = isInVictoryPath(
+                playerColor,
+                currentPawnPositon,
+              );
+
+              if (victoryPos !== -1 && victoryPos != null) {
+                const path = victoryPathMap[playerColor];
+                const lastIndex = path.length - 1;
+                const remainingSteps = lastIndex - victoryPos;
+
+                // not eligible for dice shoots
+                if (game.currentDiceValue > remainingSteps + 1) {
+                  broadcast(game.players, {
+                    type: UPDATE_PLAYERS,
+                    message: "Pawn not eligible to move on victory path",
+                    data: {
+                      players: game.playerData(),
+                      currentPlayerTurn:
+                        game.currentPlayerTurn[game.currentTurnIndex],
+                      Gametatus: game.status,
+                    },
+                  });
+                  return;
+                }
+
+                const movementsPath = createMovementPathForVictory(
+                  victoryPos,
+                  game.currentDiceValue,
+                  playerColor,
+                );
+
+                if (!movementsPath) return;
+
+                game.toPosition = {
+                  ...movementsPath[movementsPath.length - 1],
+                  playerId: user.id,
+                  pawnId: parsedMessageObject.data.pawnId,
+                  color: user.color as string,
+                };
+
+                game.fromPosition = {
+                  ...parsedMessageObject.data.position,
+                  playerId: user.id,
+                  pawnId: parsedMessageObject.data.pawnId,
+                  color: user.color as string,
+                };
+
+                broadcast(game.players, {
+                  type: MADE_MOVE,
+                  message: "pawn moved on victory path",
+                  data: {
+                    playerId: user.id,
+                    gameId: game.gameId,
+                    pawnId,
+                    movement: movementsPath,
+                  },
+                });
+
+                return;
+              }
+            }
+            break;
+
+          case "passed-turn":
+            if (user.id === game.currentPlayerTurn[game.currentTurnIndex]) {
+              console.log("hit this event");
+              //now update the currentPlayerTurn
+              game.currentTurnIndex =
+                (game.currentTurnIndex + 1) % game.currentPlayerTurn.length;
+              game.currentDiceValue = -1;
+              const msgData = {
+                type: TURN_UPDATED,
+                data: {
+                  currentPlayerTurn:
+                    game.currentPlayerTurn[game.currentTurnIndex],
+                },
+              };
+              broadcast(game.players, msgData);
+            }
+
+            break;
+
+          case "movement_done":
+            // first check user is correct or not
+            if (
+              user.id === game.fromPosition?.playerId &&
+              user.id === game.currentPlayerTurn[game.currentTurnIndex] &&
+              game.toPosition
+            ) {
+              // if correct then first update the position of that player
+              game.updatePawnPosition(user.id); // just update the pawn position
+
+              //before updating the current player turn first we have to check is there is kill situation
+              const killResult = game.isThereKill(game.toPosition);
+              // if there is kill situation then
+              if (killResult) {
+                console.log("there is kill situtation : ", killResult);
+                const { killedPlayer, killedPawn } = killResult;
+                // call method to set fromPosition and toPosition
+                const momentPath = game.sendPawnToHome(
+                  killedPlayer,
+                  killedPawn,
+                );
+                // and then broadcast the message to all players
+                console.log("movement path after kill : ", momentPath);
+
+                const killMsg = {
+                  type: PAWN_KILLED, // New event type
+                  message: "pawn killed - sending to home",
+                  data: {
+                    playerId: killedPlayer.id,
+                    gameId: game.gameId,
+                    pawnId: killedPawn.pawnId,
+                    movement: momentPath,
+                  },
+                };
+                broadcast(game.players, killMsg);
+
+                //  <--------------------------------      if that user got won       ------------------------------------>
+                const hasWon = game.checkVictory(user.id);
+
+                if (hasWon) {
+                  user.hasWon = true; // mark that player hasWon :true
+                  //then remove that player id from that currentPlayerTurn
+                  game.currentPlayerTurn = game.currentPlayerTurn.filter(
+                    (player) => player !== user.id,
+                  );
+                  // also add that player with rank in winnerRank array
+                  game.winnerRank.push({
+                    playerId: user.id,
+                    rank: game.winnerRank.length + 1,
+                  });
+                  // send game won event
+                  const msg = {
+                    type: GAME_WON,
+                    message: `Player ${user.color} has won!`,
+                    data: {
+                      players: game.playerData(),
+                      winnerRank: game.winnerRank,
+                    },
+                  };
+                  broadcast(game.players, msg);
+
+                  // check if game should end or not
+                  if (game.currentPlayerTurn.length === 1) {
+                    game.status = "end";
+                    const msg = {
+                      type: GAME_END,
+                      message: `Game has been ended`,
+                      data: {
+                        players: game.playerData(),
+                        gameStatus: game.status,
+                        winnerRank: game.winnerRank,
+                      },
+                    };
+                    broadcast(game.players, msg);
+                  }
+                  return;
+                }
+              } else {
+                if (game.currentDiceValue === 6) {
+                  const msgData = {
+                    type: UPDATE_PLAYERS,
+                    message: "updated players data and current turn",
+                    data: {
+                      players: game.playerData(),
+                      currentPlayerTurn:
+                        game.currentPlayerTurn[game.currentTurnIndex],
+                      Gametatus: game.status,
+                    },
+                  };
+                  broadcast(game.players, msgData);
+                  // make -1 to currentDiceValue
+                  game.currentDiceValue = -1;
+                } else {
+                  //now update the currentPlayerTurn
+                  game.currentTurnIndex =
+                    (game.currentTurnIndex + 1) % game.currentPlayerTurn.length;
+                  // now send next player turn and updated players to client
+                  const msgData = {
+                    type: UPDATE_PLAYERS,
+                    message: "here is the updated players data",
+                    data: {
+                      players: game.playerData(),
+                      currentPlayerTurn:
+                        game.currentPlayerTurn[game.currentTurnIndex],
+                      Gametatus: game.status,
+                    },
+                  };
+                  broadcast(game.players, msgData);
+                  game.currentDiceValue = -1;
+                }
+              }
+            }
+            break;
+
+          case "kill_animation_done":
+            // first update the pawn position of killed pawn
+            game.updatePawnPosition(parsedMessageObject.data.id);
+            console.log("user id in animation done event : ", user.id);
+            console.log(
+              "current player turn : ",
+              game.currentPlayerTurn[game.currentTurnIndex],
+            );
+            // Client sends this after kill animation finishes
+            if (
+              parsedMessageObject.data.killedId === game.toPosition?.playerId &&
+              user.id === game.currentPlayerTurn[game.currentTurnIndex]
+            ) {
+              if (game.currentDiceValue === 6) {
+                this.sendTurnUpdate(game);
+                //reset dice value but keep same player turn
+                game.currentDiceValue = -1;
+              } else {
+                this.advancePlayerTurn(game);
+                this.sendTurnUpdate(game);
+                game.currentDiceValue = -1;
+              }
+              // game.currentDiceValue = -1;
+
+              // const msgData = {
+              //   type: UPDATE_PLAYERS,
+              //   message: "here is the updated players data after kill",
+              //   data: {
+              //     players: game.playerData(),
+              //     currentPlayerTurn:
+              //       game.currentPlayerTurn[game.currentTurnIndex],
+              //     Gametatus: game.status,
+              //   },
+              // };
+              // broadcast(game.players, msgData);
+            }
+            break;
+
+          case "send_chat_message":
+            if (game.status === "start") {
+              const messageData = game.addMessage(
+                user.id,
+                user.username,
+                parsedMessageObject.data.message,
+                user.color as string,
+              );
+
+              const msg = {
+                type: SEND_CHAT_MESSAGE,
+                messgae: "send all the message successfully",
+                data: {
+                  messages: messageData,
+                },
+              };
+              // broadcast the message to every user
+              broadcast(game.players, msg);
+            }
+            break;
         }
-        let players: playerArray[] = [];
-        game.players.forEach((player, playerId) => {
-          players.push({
-            id: player.id,
-            name: player.name,
-            color: player.color,
-            currentpawnsPosition: player.currentPosition,
-          });
-        });
-
-        game.players.forEach((player) => {
-          player.socket.send(
-            JSON.stringify({
-              type: GAME_STARTED,
-              payload: { players: players },
-              rollTurn: game.rollTurn,
-            })
-          );
-        });
       }
+    } catch (err) {
+      console.log(data);
+      console.log(err);
     }
   }
 
-  // when host roll the dice
-  rollDice(socket: WebSocket, parsedMessage: any) {
-    const payload = parsedMessage.payload;
-    const game = this.games.get(payload.roomId);
-    if (game && game.players.get(payload.id) && game.rollTurn === payload.id) {
-      const newVal = Math.floor(Math.random() * 6) + 1;
-      game.diceValue = newVal;
-      game.players.forEach((player) => {
-        player.socket.send(
-          JSON.stringify({
-            type: ROLLED_DICE,
-            payload: {
-              playerId: payload.id,
-              roomId: payload.roomId,
-              diceValue: newVal,
-            },
-          })
-        );
-      });
-    }
+  // function to check wheather gameId is valid or not
+  validGameId(gameId: string) {
+    return this.Game.get(gameId);
   }
 
-  // when player make move
-  makeMove(socket: WebSocket, parsedMessage: any) {
-    console.log("hit the make move  event in server side");
-    const payload = parsedMessage.payload;
-    /*
-    "payload" : {
-      "id" : "..."
-      "roomId" : "..."
-      "pawn" : ""
-    }
-    */
-    const room = this.rooms.get(payload.roomId);
-    if (room) {
-      const user = room.players.get(payload.id);
-      if (user && user.socket === socket) {
-        const game = this.games.get(payload.roomId);
-        if (game && !game.isGameOver()) {
-          console.log("called the makeMove function on server side");
-          game.makeMove(payload.roomId, payload.pawn, user);
-        }
-      }
-    }
+  // Helper method to advance to next player turn
+  private advancePlayerTurn(game: Game): void {
+    game.currentTurnIndex =
+      (game.currentTurnIndex + 1) % game.currentPlayerTurn.length;
+    game.currentDiceValue = -1;
   }
 
-  // if client dont make move
-  skipMove(socket: WebSocket, parsedMessage: any) {
-    const payload = parsedMessage.payload;
-    console.log("parsed message in skipMove : ", payload);
-    const playerId = payload.id;
-    const game = this.games.get(payload.roomId);
-    console.log("game in skipped move function : ", game);
-    if (game && game.players.get(playerId)) {
-      console.log("player in skipped move : ", game.players.get(playerId));
-      const id = game.checkNextTurn(playerId);
-      console.log("id in next turn in skipped move : ", id);
-      if (id !== -1) {
-        game.rollTurn = id;
-        game.players.forEach((player) => {
-          player.socket.send(
-            JSON.stringify({
-              type: MOVE_SKIPED,
-              payload: {
-                nextTurn: game.rollTurn,
-              },
-            })
-          );
-        });
-      }
-    }
+  // Helper method to send turn update to all players
+  private sendTurnUpdate(game: Game): void {
+    const msgData = {
+      type: UPDATE_PLAYERS,
+      message: "updated players data and current turn",
+      data: {
+        players: game.playerData(),
+        currentPlayerTurn: game.currentPlayerTurn[game.currentTurnIndex],
+        Gametatus: game.status,
+      },
+    };
+    broadcast(game.players, msgData);
   }
 }

@@ -42,7 +42,7 @@ export default function Chatbox({ closeBox }: { closeBox: () => void }) {
       {/* Header */}
       <div
         onClick={closeBox}
-        className=" bg-orange-500 p-1 py-2 border-b-2 cursor-pointer"
+        className=" bg-orange-500 p-1 py-2 border-b-2 cursor-pointer "
       >
         <Menu />
       </div>

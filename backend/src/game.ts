@@ -1,260 +1,227 @@
-import WebSocket from "ws";
-import { User } from "./user";
-import {
-  globalGamePath,
-  homePoints,
-  isHome,
-  isPath,
-  isSafe,
-  isStart,
-  isVictory,
-  isVictoryPath,
-  startPoints,
-  victoryBox,
-} from "./utils/grid";
-import { MOVED_MAKE } from "./messages";
+import { v4 as uuidv4 } from "uuid";
+import User from "./user";
+import { homePosition, pawnPosition } from "./utils/pawnPath";
+import { ChatMessages, KillResult, pawnPositon } from "./type";
+import { getFreeHomePosition, isInHome, momentPath } from "./utils/helperFn";
 
-const color: string[] = ["red", "blue", "green", "yellow"]; // color order
-export class Game {
-  public roomId: string;
-  public diceValue: number | null;
-  public players: Map<string, User>;
-  public rollTurn: string | null;
-  constructor() {
-    this.roomId = "";
-    this.diceValue = null;
-    this.players = new Map();
-    this.rollTurn = null;
+const LUDO_TURN_ORDER = ["red", "blue", "yellow", "green"] as const;
+
+export default class Game {
+  gameId: string;
+  status: "create" | "wait" | "start" | "end";
+  players: Map<string, User> = new Map();
+  colors: string[] = ["blue", "green", "red", "yellow"]; // store to assign color to each player and then make it null
+  currentDiceValue: number; // store currnet dice value
+  currentPlayerTurn: string[]; // store array of player-ids who has a current turn to roll dice
+  currentTurnIndex: number; // Track whose turn it is
+  fromPosition: pawnPositon | null = null;
+  toPosition: pawnPositon | null = null;
+  chatMessages: ChatMessages[] = [];
+  winnerRank: { playerId: string; rank: number }[] = [];
+  // when host initialize game then create new game and add host in User Map
+  constructor(user: User) {
+    this.gameId = uuidv4();
+    this.players.set(user.id, user);
+    this.status = "create";
+    this.currentDiceValue = -1;
+    this.currentPlayerTurn = [];
+    this.currentTurnIndex = 0;
   }
 
-  private assignColor(allPlayers: Map<string, User>) {
-    let index = 0;
-    if (allPlayers.size === 2) {
-      allPlayers.forEach((player) => {
-        player.color = color[index];
-        index += 2;
-      });
-    } else {
-      allPlayers.forEach((player) => {
-        player.color = color[index];
-        index++;
-      });
-      return;
-    }
+  // handler to add player in players map
+  addPlayer(user: User) {
+    this.players.set(user.id, user);
   }
 
-  private initializePosition(allPlayers: Map<string, User>) {
-    allPlayers.forEach((player) => {
-      const position = homePoints[player.color].map((pos, index) => {
-        const newObject = {
-          pawns: `${player.color[0]}${index}`,
-          position: pos,
-        };
-        return newObject;
-      });
-      player.currentPosition = position;
-      player.prevPosition = position;
-    });
+  // get customize player data
+  playerData() {
+    // return customizable data of all players
+    return [...this.players.values()].map((player) => ({
+      id: player.id,
+      username: player.username,
+      type: player.type,
+      color: player.color,
+      pawnPosition: player.pawnPosition,
+      hasWon: player.hasWon,
+    }));
   }
 
-  startGame(roomId: string, id: string, allPlayers: Map<string, User>) {
-    this.roomId = roomId;
-    this.rollTurn = id;
-    allPlayers.forEach((player) => {
-      this.players.set(player.id, player);
-    });
-    this.assignColor(allPlayers);
-    this.initializePosition(allPlayers);
-  }
-
-  makeMove(roomId: string, pawn: string, player: User) {
-    if (roomId === this.roomId && player.id === this.rollTurn) {
-      const currentPlayer = this.players.get(player.id);
-      if (currentPlayer) {
-        const pawnPosition = currentPlayer.currentPosition.find(
-          (obj, i) => obj.pawns === pawn
-        );
-        const pawnPrevPosition = currentPlayer.prevPosition.find(
-          (obj, i) => obj.pawns === pawn
-        );
-        console.log("current position of player is : ", pawnPosition);
-        console.log("previous position of player is : ", pawnPrevPosition);
-
-        if (pawnPosition && pawnPrevPosition) {
-          // if player in home area
-          if (isHome(pawnPosition.position, currentPlayer.color)) {
-            // calculate new position
-            if (this.diceValue === 6) {
-              const updatedPosition = startPoints[currentPlayer.color][0];
-              console.log("updated position", updatedPosition);
-              //update the currentposition and prevPosition of pawns
-              pawnPrevPosition.position = pawnPosition.position;
-              pawnPosition.position = updatedPosition;
-
-              //updated the roll turn
-              const id = this.checkNextTurn(player.id);
-              if (id !== -1) {
-                this.rollTurn = id;
-                console.log("next rool turn id : ", id);
-              }
-              //broadcast the updated position to all the players
-              this.broadCasting(
-                roomId,
-                player.id,
-                player.color,
-                pawn,
-                updatedPosition
-              );
-              return;
-            } else {
-              //updated the roll turn
-              const id = this.checkNextTurn(player.id);
-              if (id !== -1) {
-                this.rollTurn = id;
-                console.log("next rool turn id : ", id);
-              }
-              //broadcast the updated position to all the players
-              this.broadCasting(
-                roomId,
-                player.id,
-                player.color,
-                pawn,
-                pawnPosition.position
-              );
-            }
-          } else if (
-            isPath(pawnPosition.position, currentPlayer.color) !== null
-          ) {
-            const index = isPath(pawnPosition.position, currentPlayer.color);
-            if (index !== null && this.diceValue) {
-              // calculate new position
-              console.log("index in global path array : ", index);
-              const updatedPosition = globalGamePath[index + this.diceValue];
-              console.log(
-                "updated position in global path path array : ",
-                updatedPosition
-              );
-              //check if any pawn is killed or not
-              const killed = this.ifPawnKill(player, updatedPosition);
-
-              //update the currentposition and prevPosition of pawns
-              pawnPrevPosition.position = pawnPosition.position;
-              pawnPosition.position = updatedPosition;
-              //updated the roll turn
-              const id = this.checkNextTurn(player.id, killed);
-              if (id !== -1) {
-                this.rollTurn = id;
-                console.log("next rool turn id : ", id);
-              }
-              //broadcast the updated position to all the players
-              this.broadCasting(
-                roomId,
-                player.id,
-                player.color,
-                pawn,
-                updatedPosition
-              );
-              return;
-            }
-          }
-        }
-        // if player in victory path
-        if (
-          pawnPosition &&
-          isVictoryPath(pawnPosition.position, currentPlayer.color)
-        ) {
-        }
-        // if player in victory box
-        if (
-          pawnPosition &&
-          isVictory(pawnPosition.position, currentPlayer.color)
-        ) {
-        }
+  // start the game like assign the current position of all pawns for all players
+  startGame() {
+    // assign current pawns position to all players
+    for (const player of this.players.values()) {
+      const color = player.color; // store the color
+      if (color) {
+        // assign start position to every player
+        homePosition[color].forEach((pawn, index) => {
+          player.pawnPosition.push({
+            pawnId: `${color[0]}${index}`,
+            position: { x: pawn.x, y: pawn.y, index: pawn.index },
+          });
+        });
       }
+      // decide current player turn
+      this.currentPlayerTurn = this.getTurnOrder();
+      this.currentTurnIndex = 0;
+      this.status = "start";
     }
   }
 
-  // check game is over or not
-  isGameOver(): boolean {
-    let completedCount = 0;
+  // private function to get the turn order based on LUDO_TURN_ORDER
+  private getTurnOrder(): string[] {
+    const playersArray = Array.from(this.players.values());
 
-    for (const [, player] of this.players) {
-      if (this.isPlayerCompleted(player)) {
-        completedCount++;
-      }
-    }
-    return completedCount >= 3;
+    // Sort players by their color's position in LUDO_TURN_ORDER
+    playersArray.sort((a, b) => {
+      const colorA = a.color || "";
+      const colorB = b.color || "";
+
+      const indexA = LUDO_TURN_ORDER.indexOf(colorA as any);
+      const indexB = LUDO_TURN_ORDER.indexOf(colorB as any);
+
+      return indexA - indexB;
+    });
+
+    // Return array of player IDs in correct order
+    return playersArray.map((p) => p.id);
   }
 
-  // check if a single player has all pawns in victory box
-  private isPlayerCompleted(player: User): boolean {
-    return victoryBox[player.color].every((pos) =>
-      player.currentPosition.some((p) => p.position === pos)
-    );
-  }
-
-  // assign nextTurn after making move
-  checkNextTurn(id: string, killed?: boolean) {
-    if (this.diceValue === 6 || killed) return id; // if dice value 6 then dont change roll turn
-    const ids = Array.from(this.players.keys());
-    const index = ids.indexOf(id);
-    if (index >= 0) {
-      return ids[(index + 1) % ids.length];
-    }
-    return -1;
-  }
-
-  //broadcasting move to all the players
-  private broadCasting(
-    roomId: string,
-    id: string,
-    color: string,
-    pawn: string,
-    updatedPosition: string
-  ) {
-    console.log("broadcasting function called");
-    this.players.forEach((player) => {
-      player.socket.send(
-        JSON.stringify({
-          type: MOVED_MAKE,
-          payload: {
-            roomId: roomId,
-            id: id,
-            color: color,
-            pawn: pawn,
-            pawnPosition: updatedPosition,
-            rollTurn: this.rollTurn,
-          },
-        })
+  //  function to update pawn position
+  updatePawnPosition(playerId: string) {
+    const player = this.players.get(playerId); // get the player with respective id
+    if (
+      player?.id === this.fromPosition?.playerId &&
+      player?.id === this.toPosition?.playerId
+    ) {
+      const pawn = player?.pawnPosition.find(
+        (pawn) => pawn.pawnId === this.fromPosition?.pawnId,
       );
-    });
-  }
-
-  private ifPawnKill(player: User, updatedPosition: string): boolean {
-    let killed = false;
-    const validPlayer = this.players.get(player.id);
-
-    if (validPlayer) {
-      for (const opponentPlayer of this.players.values()) {
-        if (opponentPlayer.id === player.id) continue;
-
-        for (const pawn of opponentPlayer.currentPosition) {
-          if (pawn.position === updatedPosition) {
-            // find free home grid
-            const freeGrid = homePoints[opponentPlayer.color].find(
-              (pos) =>
-                !opponentPlayer.currentPosition.some((p) => p.position === pos)
-            );
-            if (freeGrid) {
-              pawn.position = freeGrid; // send pawn back home
-              killed = true;
-            }
-            break;
-          }
-        }
-        if (killed) break;
+      // if pawn is exist then update this toPosition object
+      if (pawn) {
+        pawn.position.x = this.toPosition?.x as number;
+        pawn.position.y = this.toPosition?.y as number;
+        pawn.position.index = this.toPosition?.index as number;
       }
     }
-    return killed;
+  }
+
+  //  function to check if there is any kill situation or not
+  isThereKill(playerPosition: pawnPositon): KillResult | undefined {
+    const landingCell = pawnPosition[playerPosition.index];
+    console.log("that cell data : ", landingCell);
+    if (landingCell?.isSafe) return;
+    for (const player of this.players.values()) {
+      if (player.id === playerPosition.playerId) continue;
+      for (const pawn of player.pawnPosition) {
+        if (
+          pawn.position.x === playerPosition.x &&
+          pawn.position.y === playerPosition.y &&
+          pawn.position.index === playerPosition.index
+        ) {
+          // this.sendPawnToHome(player, pawn);
+          return {
+            killedPlayer: player,
+            killedPawn: pawn,
+          };
+        }
+      }
+    }
+  }
+
+  sendPawnToHome(
+    player: User,
+    killedPawn: {
+      pawnId: string;
+      position: {
+        x: number;
+        y: number;
+        index: number;
+      };
+    },
+  ) {
+    // code here
+    // first set fromPosition and toPosition
+    this.fromPosition = {
+      playerId: player.id,
+      pawnId: killedPawn.pawnId,
+      color: player.color as string,
+      x: killedPawn.position.x,
+      y: killedPawn.position.y,
+      index: killedPawn.position.index,
+    };
+
+    console.log("from position : ", this.fromPosition);
+    const color = player.color as string;
+
+    const freeHome = getFreeHomePosition(color, player.pawnPosition);
+
+    if (freeHome) {
+      console.log("Free home cell:", freeHome);
+    }
+
+    console.log("free home : ", freeHome);
+    if (!freeHome) return;
+
+    this.toPosition = {
+      playerId: player.id,
+      pawnId: killedPawn.pawnId,
+      color: player.color as string,
+      x: freeHome.x,
+      y: freeHome.y,
+      index: freeHome.index,
+    };
+
+    console.log("target position : ", this.toPosition);
+    const movementPath = momentPath(this.fromPosition, this.toPosition); // create moment path
+    return movementPath;
+  }
+
+  checkIfAllPawnsInHome(userId: string): boolean {
+    const player = this.players.get(userId);
+
+    if (!player || !player.pawnPosition) {
+      return false;
+    }
+
+    // Check if ALL pawns are in home position
+    const allInHome = player.pawnPosition.every((pawn) => {
+      const pawnPosition = pawn.position;
+      return isInHome(player.color as string, pawn.pawnId, pawnPosition);
+    });
+
+    return allInHome;
+  }
+  // function to add the message
+  addMessage(userId: string, username: string, message: string, color: string) {
+    this.chatMessages.push({
+      messageId: uuidv4(),
+      userId,
+      username,
+      message,
+      timestamp: Date.now(),
+      color,
+    });
+
+    return this.chatMessages[this.chatMessages.length - 1];
+  }
+
+  // get recent messages only
+  getRecentMessages(limit = 50) {
+    return this.chatMessages.slice(-limit);
+  }
+
+  // Add to your Games class or WholeLogic
+
+  checkVictory(playerId: string): boolean {
+    const player = [...this.players.values()].find((p) => p.id === playerId);
+
+    if (!player) return false;
+
+    // victory means all four pawns at -1 index
+    const allPawnsInVictory = player.pawnPosition.every(
+      (pawn) => pawn.position.index === -1,
+    );
+
+    return allPawnsInVictory;
   }
 }

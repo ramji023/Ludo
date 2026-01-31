@@ -2,11 +2,18 @@ import useSocketStore from "../../store/SocketStore";
 import PawnIcon from "../../icons/PawnIcon";
 import type { Pawn, Player } from "../../types/types";
 import { useEffect, useState } from "react";
-import { getPawnOffset, normalizePawnPosition } from "../../helperFN";
+import {
+  checkIfAllPawnsInHome,
+  checkIfPawnInHome,
+  getPawnOffset,
+  normalizePawnPosition,
+} from "../../helperFN";
 // <---------------  render pawn based on position  --------------->
 
 export default function PawnPosition() {
   const id = useSocketStore((s) => s.id);
+  const color = useSocketStore((s) => s.color);
+  const currentDiceValue = useSocketStore((s) => s.currentDiceValue);
   const currentPlayerTurn = useSocketStore((s) => s.currentPlayerTurn);
   const players = useSocketStore((s) => s.players); // track all the pawn positions of all players
   const movementData = useSocketStore((s) => s.movementData); // track movement array of all the object of {x,y,index} to perform movement
@@ -123,7 +130,8 @@ export default function PawnPosition() {
       JSON.stringify({
         type: "kill_animation_done",
         data: {
-          id: useSocketStore.getState().killMovementData?.playerId,
+          id: useSocketStore.getState().id,
+          killedId: useSocketStore.getState().killMovementData?.playerId,
           gameId: useSocketStore.getState().gameId,
         },
       }),
@@ -162,7 +170,7 @@ export default function PawnPosition() {
       setAnimatedKillPawn(null);
       setIsMoving(false);
     }
-  }, [currentPlayerTurn]);
+  }, [currentPlayerTurn, currentDiceValue]);
   return (
     <>
       {players &&
@@ -181,7 +189,12 @@ export default function PawnPosition() {
             );
 
             const isMyTurn = player.id === id && id === currentPlayerTurn;
-            const isValidClick = isMyTurn && !hasMoved && !isMoving;
+            const isPawnInHome = checkIfPawnInHome(p.position, player.color);
+            const isValidClick =
+              isMyTurn &&
+              !hasMoved &&
+              !isMoving &&
+              !(isPawnInHome && currentDiceValue !== 6);
 
             const isAnimating = animatedPawn?.pawnId === p.pawnId;
             const isKillAnimating = animatedKillPawn?.pawnId === p.pawnId;

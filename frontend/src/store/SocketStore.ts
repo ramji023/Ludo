@@ -15,6 +15,7 @@ const useSocketStore = create<SocketStoreType>((set) => ({
   movementData: null, // store the movement data of pawn
   killMovementData: null, // store the movement data of killed pawn
   chatMessages: [], // array to store all the messages
+  winnerRank: [], // winner rank stored here
   setSocketInstance: (socket: WebSocket) => {
     set({ socket }); // store the socket object in socket
 
@@ -63,6 +64,13 @@ const useSocketStore = create<SocketStoreType>((set) => ({
 
         case "dice_rolled":
           set({ currentDiceValue: parsedDataObject.data.diceValue });
+          break;
+
+        case "turn_updated":
+          set({
+            currentPlayerTurn: parsedDataObject.data.currentPlayerTurn,
+            currentDiceValue: -1,
+          });
           break;
 
         case "made_move":
@@ -116,6 +124,22 @@ const useSocketStore = create<SocketStoreType>((set) => ({
               parsedDataObject.data.messages,
             ],
           });
+          break;
+
+        case "game_won":
+          set({
+            players: parsedDataObject.data.players,
+            winnerRank: parsedDataObject.data.winnerRank,
+          });
+          break;
+
+        case "game_ended":
+          set({
+            players: parsedDataObject.data.players,
+            gameStatus: parsedDataObject.data.gameStatus,
+            winnerRank: parsedDataObject.data.winnerRank,
+          });
+
           break;
       }
     };

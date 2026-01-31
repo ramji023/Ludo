@@ -12,6 +12,7 @@ export interface SocketStoreType {
         username: string;
         type: string;
         color: string;
+        hasWon:boolean;
         pawnPosition:
           | {
               pawnId: string;
@@ -52,6 +53,7 @@ export interface SocketStoreType {
     timestamp: number;
     color: string;
   }[];
+  winnerRank: { playerId: string; rank: number }[] ;
   setSocketInstance: (socket: WebSocket) => void;
 }
 
@@ -80,3 +82,22 @@ export interface Pawn {
     index: number;
   };
 }
+
+export interface Players {
+  id: string;
+  username: string;
+  type: string;
+  color: string;
+  hasWon:boolean;
+  pawnPosition:
+    | {
+        pawnId: string;
+        position: {
+          x: number;
+          y: number;
+          index: number;
+        };
+      }[]
+    | [];
+}
+

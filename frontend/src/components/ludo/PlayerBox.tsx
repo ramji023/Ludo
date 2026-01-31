@@ -2,7 +2,7 @@
 interface PlayerBoxProps {
   color: "red" | "blue" | "green" | "yellow";
   position: "top-left" | "top-right" | "bottom-left" | "bottom-right";
-  player?: { id: string } | undefined;
+  player?: { id: string,username:string } | undefined;
 }
 
 export default function PlayerBox({ color, position, player }: PlayerBoxProps) {
@@ -21,7 +21,7 @@ export default function PlayerBox({ color, position, player }: PlayerBoxProps) {
   };
 
   const currentPlayerTurn = useSocketStore((s) => s.currentPlayerTurn); // current player turn
-
+  
   // check isActive status
   const isActive =
     player !== undefined &&
@@ -38,7 +38,7 @@ export default function PlayerBox({ color, position, player }: PlayerBoxProps) {
         ${isActive ? "border-orange-500 shadow-xl" : "border-gray-400"}
       `}
       >
-        {color[0].toUpperCase()}
+        {player?.username[0].toUpperCase()}
       </div>
 
       {/* dice box*/}
@@ -56,6 +56,7 @@ export default function PlayerBox({ color, position, player }: PlayerBoxProps) {
 // <------------------  Dice component  ----------------------->
 import { useEffect, useRef, useState } from "react";
 import useSocketStore from "../../store/SocketStore";
+import { checkIfAllPawnsInHome } from "../../helperFN";
 
 interface DiceProps {
   color: "red" | "blue" | "green" | "yellow";
@@ -63,6 +64,7 @@ interface DiceProps {
 }
 
 function Dice({ color, playerId }: DiceProps) {
+  const players = useSocketStore((s) => s.players);
   const currentPlayerTurn = useSocketStore((s) => s.currentPlayerTurn);
   const id = useSocketStore((s) => s.id);
   const currentDiceValue = useSocketStore((s) => s.currentDiceValue); // store current dice value data
@@ -123,6 +125,22 @@ function Dice({ color, playerId }: DiceProps) {
         setDiceValue(currentDiceValue);
         setIsRolling(false);
         setHasRolled(true);
+
+        // send this event if dice value !== 6 and all pawn is in home
+        if (currentDiceValue !== 6 && currentDiceValue > 0) {
+          const result = checkIfAllPawnsInHome(id!, color!, players!);
+          if (result) {
+            useSocketStore.getState().socket?.send(
+              JSON.stringify({
+                type: "passed-turn",
+                data: {
+                  id: id,
+                  gameId: useSocketStore.getState().gameId,
+                },
+              }),
+            );
+          }
+        }
         timeoutRef.current = null;
       }, remaining_time);
     }
@@ -141,7 +159,7 @@ function Dice({ color, playerId }: DiceProps) {
     if (currentPlayerTurn) {
       setHasRolled(false);
     }
-  }, [currentPlayerTurn]);
+  }, [currentPlayerTurn, currentDiceValue]);
 
   // function to render the dots on dice
   const renderDots = () => {

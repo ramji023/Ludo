@@ -1,33 +1,24 @@
-import { homePoints } from "./utils/grid";
-import { WebSocket } from "ws";
 import { v4 as uuidv4 } from "uuid";
-export class User {
-  public id: string;
-  public socket: WebSocket;
-  public name: string;
-  public color: string;
-  public currentPosition: { pawns: string; position: string }[] = [];
-  public prevPosition: { pawns: string; position: string }[] = [];
-  constructor(
-    socket: WebSocket,
-    name: string,
-  ) {
-    this.socket = socket;
+import { WebSocket } from "ws";
+
+export default class User {
+  id: string;
+  username: string;
+  socket: WebSocket;
+  type: "host" | "player";
+  color: null | string;
+  pawnPosition: {
+    pawnId: string;
+    position: { x: number; y: number; index: number };
+  }[];
+  hasWon:boolean;
+  constructor(username: string, type: "host" | "player", socket: WebSocket) {
     this.id = uuidv4();
-    this.name = name;
-    this.color = ""
+    this.username = username;
+    this.type = type;
+    this.socket = socket;
+    this.color = null;
+    this.pawnPosition = [];
+    this.hasWon = false;
   }
-
 }
-
-/**
- * 
- * homePoints[color].map((pos, index) => {
-      const newObject = {
-        pawns: `${this.color[0]}${index}`,
-        position: pos,
-      };
-      this.currentPosition.push(newObject);
-    });
-    this.prevPosition = [...this.currentPosition];
- */
