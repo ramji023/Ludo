@@ -49,7 +49,7 @@ export function CreateRoom() {
   // write effect to run when game status became "start"
   useEffect(() => {
     if (gameStatus === "start") {
-      console.log("game status : ",gameStatus)
+      console.log("game status : ", gameStatus);
       useSocketStore
         .getState()
         .audioManager?.stop(
@@ -61,18 +61,23 @@ export function CreateRoom() {
 
   // send start_game event to server to start the ludo game
   const handleStartGame = () => {
-    console.log('start button hit')
-    console.log("websocket : ",socket)
-    if (socket) {
-      socket.send(
-        JSON.stringify({
-          type: "start_game",
-          data: {
-            id: useSocketStore.getState().id,
-            gameId: useSocketStore.getState().gameId,
-          },
-        }),
-      );
+    console.log("start button hit");
+    console.log("websocket : ", socket);
+    const players = useSocketStore.getState().players;
+    if (players !== null && players.length > 1) {
+      if (socket) {
+        socket.send(
+          JSON.stringify({
+            type: "start_game",
+            data: {
+              id: useSocketStore.getState().id,
+              gameId: useSocketStore.getState().gameId,
+            },
+          }),
+        );
+      }
+    } else {
+      alert("Please add one more player");
     }
   };
 

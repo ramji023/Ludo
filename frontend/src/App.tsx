@@ -13,7 +13,7 @@ if (import.meta.env.MODE === "development") {
 
 function App() {
   // simulateGameWon();
-  simulateGameEnded();
+  // simulateGameEnded();
   return (
     <>
       <BrowserRouter>
