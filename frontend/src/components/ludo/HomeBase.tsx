@@ -7,8 +7,8 @@ import {
   yellowHomePosition,
 } from "../../pawnPath";
 import useSocketStore from "../../store/SocketStore";
-import { GameEnd } from "../badges/GameEnd";
 import { WonBadge } from "../badges/WonBadge";
+import { useEffect } from "react";
 
 const BADGE_BOX = 160;
 
@@ -22,7 +22,18 @@ const HOME_BASE_CENTERS = {
 export default function HomeBase() {
   const players = useSocketStore((s) => s.players);
   const winnerRank = useSocketStore((s) => s.winnerRank);
-  const gameStatus = useSocketStore((s) => s.gameStatus);
+
+  useEffect(() => {
+    console.log("winner rank : ",winnerRank)
+    if (winnerRank.length > 0 && winnerRank.length <= 3) {
+      useSocketStore
+        .getState()
+        .audioManager?.play(
+          "https://res.cloudinary.com/dqr7qcgch/video/upload/v1769922435/ochoochogift-winner-laugh-154997_pcmr4d.mp3",3000
+        );
+    }
+  }, [winnerRank]);
+
   return (
     <>
       {/* Blue home base */}
@@ -116,7 +127,6 @@ export default function HomeBase() {
           })}
         </g>
       )}
-
     </>
   );
 }

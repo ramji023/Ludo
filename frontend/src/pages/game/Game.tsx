@@ -11,6 +11,14 @@ export default function Game() {
   const [unreadMessages, setUnreadMessages] = useState(0); // track unread messages
   const chatMessages = useSocketStore((s) => s.chatMessages); // array to store all the messages got from server side
 
+  // run the audio when game component navigate to "game" page
+  useSocketStore
+    .getState()
+    .audioManager?.play(
+      "https://res.cloudinary.com/dqr7qcgch/video/upload/v1756981643/start_mudwqg.mp3",
+      1500,
+    );
+
   // function to close the box
   function closeChatBox() {
     setOpenChatBox(false);
@@ -21,6 +29,19 @@ export default function Game() {
       setUnreadMessages((prev) => prev + 1);
     }
   }, [chatMessages]);
+
+
+  // when game status become "end" then run this effect
+  useEffect(() => {
+    if (gameStatus === "end") {
+      useSocketStore
+        .getState()
+        .audioManager?.play(
+          "https://res.cloudinary.com/dqr7qcgch/video/upload/v1769923713/winning-218995_rtzqnf.mp3",5000
+        );
+    }
+  }, [gameStatus]);
+
   return (
     <>
       <div className="relative min-h-screen overflow-hidden bg-black/90">

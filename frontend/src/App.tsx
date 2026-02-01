@@ -5,7 +5,7 @@ import Register from "./pages/auth/Register";
 import { CreateRoom } from "./pages/auth/CreateRoom";
 import { JoinRoom } from "./pages/auth/JoinRoom";
 import useSocketStore from "./store/SocketStore";
-// import { simulateGameEnded, simulateGameWon } from "./store/test";
+import { simulateGameEnded, simulateGameWon } from "./store/test";
 
 if (import.meta.env.MODE === "development") {
   (window as any).__store = useSocketStore;
@@ -13,7 +13,7 @@ if (import.meta.env.MODE === "development") {
 
 function App() {
   // simulateGameWon();
-  // simulateGameEnded();
+  simulateGameEnded();
   return (
     <>
       <BrowserRouter>

@@ -25,6 +25,11 @@ export function CreateRoom() {
     if (socket) {
       // otherwise make false to showForm because user is authenticated
       setShowForm(false);
+      useSocketStore
+        .getState()
+        .audioManager?.play(
+          "https://res.cloudinary.com/dqr7qcgch/video/upload/v1756981644/lobbySound_vufxrq.mp3",
+        );
       setIsConnecting(false);
       setWebSocketUrl("");
     }
@@ -44,12 +49,20 @@ export function CreateRoom() {
   // write effect to run when game status became "start"
   useEffect(() => {
     if (gameStatus === "start") {
+      console.log("game status : ",gameStatus)
+      useSocketStore
+        .getState()
+        .audioManager?.stop(
+          "https://res.cloudinary.com/dqr7qcgch/video/upload/v1756981644/lobbySound_vufxrq.mp3",
+        );
       navigate("/game");
     }
   }, [gameStatus]);
 
   // send start_game event to server to start the ludo game
   const handleStartGame = () => {
+    console.log('start button hit')
+    console.log("websocket : ",socket)
     if (socket) {
       socket.send(
         JSON.stringify({

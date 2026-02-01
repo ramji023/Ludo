@@ -24,6 +24,11 @@ export function JoinRoom() {
     if (socket) {
       // otherwise make false to showForm because user is authenticated
       setShowForm(false);
+      useSocketStore
+        .getState()
+        .audioManager?.play(
+          "https://res.cloudinary.com/dqr7qcgch/video/upload/v1756981644/lobbySound_vufxrq.mp3",
+        );
       setIsConnecting(false);
       setWebSocketUrl("");
     }
@@ -32,6 +37,11 @@ export function JoinRoom() {
   // write effect to run when game status became "start"
   useEffect(() => {
     if (gameStatus === "start") {
+      useSocketStore
+        .getState()
+        .audioManager?.play(
+          "https://res.cloudinary.com/dqr7qcgch/video/upload/v1756981644/lobbySound_vufxrq.mp3",
+        );
       navigate("/game");
     }
   }, [gameStatus]);

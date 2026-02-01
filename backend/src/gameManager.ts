@@ -135,7 +135,7 @@ export class GameManager {
                   players: game.playerData(),
                   currentPlayerTurn:
                     game.currentPlayerTurn[game.currentTurnIndex],
-                  Gametatus: game.status,
+                  gameStatus: game.status,
                 },
               };
               broadcast(game.players, msg);

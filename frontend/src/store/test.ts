@@ -1,5 +1,6 @@
 // Add this helper function to test the end-game and winner functionality
 
+import AudioManager from "../audioManager";
 import useSocketStore from "./SocketStore";
 
 export const simulateGameWon = () => {
@@ -59,6 +60,7 @@ export const simulateGameWon = () => {
       },
     ],
     currentPlayerTurn: "player-2",
+    audioManager: new AudioManager(),
     winnerRank: [{ playerId: "player-1", rank: 1 }],
   });
 };
@@ -121,6 +123,7 @@ export const simulateGameEnded = () => {
     ],
     currentPlayerTurn: "player-4",
     gameStatus: "end",
+    audioManager: new AudioManager(),
     winnerRank: [
       { playerId: "player-1", rank: 1 },
       { playerId: "player-2", rank: 2 },

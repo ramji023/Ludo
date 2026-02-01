@@ -1,3 +1,5 @@
+import type AudioManager from "../audioManager";
+
 export interface SocketStoreType {
   socket: WebSocket | null;
   id: string | null;
@@ -12,7 +14,7 @@ export interface SocketStoreType {
         username: string;
         type: string;
         color: string;
-        hasWon:boolean;
+        hasWon: boolean;
         pawnPosition:
           | {
               pawnId: string;
@@ -53,7 +55,9 @@ export interface SocketStoreType {
     timestamp: number;
     color: string;
   }[];
-  winnerRank: { playerId: string; rank: number }[] ;
+  winnerRank: { playerId: string; rank: number }[];
+  audioManager: AudioManager | null;
+  setAudioManager: (audio: AudioManager) => void;
   setSocketInstance: (socket: WebSocket) => void;
 }
 
@@ -88,7 +92,7 @@ export interface Players {
   username: string;
   type: string;
   color: string;
-  hasWon:boolean;
+  hasWon: boolean;
   pawnPosition:
     | {
         pawnId: string;
@@ -100,4 +104,3 @@ export interface Players {
       }[]
     | [];
 }
-

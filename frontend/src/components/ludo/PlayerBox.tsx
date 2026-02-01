@@ -2,7 +2,7 @@
 interface PlayerBoxProps {
   color: "red" | "blue" | "green" | "yellow";
   position: "top-left" | "top-right" | "bottom-left" | "bottom-right";
-  player?: { id: string,username:string } | undefined;
+  player?: { id: string; username: string } | undefined;
 }
 
 export default function PlayerBox({ color, position, player }: PlayerBoxProps) {
@@ -21,7 +21,7 @@ export default function PlayerBox({ color, position, player }: PlayerBoxProps) {
   };
 
   const currentPlayerTurn = useSocketStore((s) => s.currentPlayerTurn); // current player turn
-  
+
   // check isActive status
   const isActive =
     player !== undefined &&
@@ -83,6 +83,19 @@ function Dice({ color, playerId }: DiceProps) {
   function rollDice() {
     if (isRolling || hasRolled) return;
     // make setIsRolling true
+    // stop previous sound
+    useSocketStore
+      .getState()
+      .audioManager?.stop(
+        "https://res.cloudinary.com/dqr7qcgch/video/upload/v1756981643/start_mudwqg.mp3",
+      );
+
+    // play dice sound
+    useSocketStore
+      .getState()
+      .audioManager?.play(
+        "https://res.cloudinary.com/dqr7qcgch/video/upload/v1756981643/rolling_cssnt7.mp3",
+      );
     setIsRolling(true);
     console.log("make setIsRolling true");
     startTimeRef.current = Date.now();
@@ -124,6 +137,12 @@ function Dice({ color, playerId }: DiceProps) {
         }
         setDiceValue(currentDiceValue);
         setIsRolling(false);
+        // stop dice sound
+        useSocketStore
+          .getState()
+          .audioManager?.stop(
+            "https://res.cloudinary.com/dqr7qcgch/video/upload/v1756981643/rolling_cssnt7.mp3",
+          );
         setHasRolled(true);
 
         // send this event if dice value !== 6 and all pawn is in home

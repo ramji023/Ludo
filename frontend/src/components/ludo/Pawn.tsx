@@ -52,7 +52,13 @@ export default function PawnPosition() {
 
     const interval = setInterval(() => {
       const pos = movement[step];
-
+      //play pawn movement sound
+      useSocketStore
+        .getState()
+        .audioManager?.play(
+          "https://res.cloudinary.com/dqr7qcgch/video/upload/v1769921271/move-itcn9d_8oJkSMIx_v7k1cn.mp3",
+          300,
+        );
       console.log("movement is happening", pos);
       setAnimatedPawn({
         pawnId,
@@ -91,7 +97,12 @@ export default function PawnPosition() {
 
     const interval = setInterval(() => {
       const pos = movement[step];
-
+      //play kill pawn movement sound
+      useSocketStore
+        .getState()
+        .audioManager?.play(
+          "https://res.cloudinary.com/dqr7qcgch/video/upload/v1769921939/snake-hiss-4-quicksoundscom-ypwaqg_OPdi99Xh_qs1vku.mp3",
+        );
       console.log("Kill movement happening", pos);
       setAnimatedKillPawn({
         pawnId,

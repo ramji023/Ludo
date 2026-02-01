@@ -12,28 +12,38 @@ export default class AudioManager {
     this.audios.set(url, audio);
   }
 
-  play(url: string, duration = 100) {
+  play(url: string, duration?: number) {
+    // Stop all currently playing audios
+    this.stopAll();
+
     // if not preloaded yet, preload now
     if (!this.audios.has(url)) {
       this.preload(url);
     }
-
-    // stop this audio if already playing
-    this.stop(url);
 
     const audio = this.audios.get(url);
     if (!audio) return;
 
     audio.currentTime = 0;
 
+    // set loop based on whether duration is given
+    if (duration === undefined) {
+      audio.loop = true; // loop continuously
+    } else {
+      audio.loop = false; // dont loop if duration defined
+    }
+
     audio
       .play()
       .then(() => {
-        const timer = setTimeout(() => {
-          this.stop(url);
-        }, duration);
+        // only set timer if duration is provided
+        if (duration !== undefined) {
+          const timer = setTimeout(() => {
+            this.stop(url);
+          }, duration);
 
-        this.timers.set(url, timer);
+          this.timers.set(url, timer);
+        }
       })
       .catch(console.warn);
   }
@@ -47,7 +57,15 @@ export default class AudioManager {
 
     audio.pause();
     audio.currentTime = 0;
+    audio.loop = false; // Reset loop when stopping
 
     this.timers.delete(url);
+  }
+
+  stopAll() {
+    // Stop all audios
+    this.audios.forEach((audio, url) => {
+      this.stop(url);
+    });
   }
 }
