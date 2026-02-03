@@ -9,6 +9,7 @@ export default function useWebSocket(webSocketConnectionUrl: string) {
   // write effect to send connection request to websocket server
   useEffect(() => {
     if (!shouldConnect) return;
+    if (webSocketConnectionUrl.length <= 0) return;
     console.log("websocket url : ", webSocketConnectionUrl);
     const wss = new WebSocket(webSocketConnectionUrl); // send connection request to websocket server
 
