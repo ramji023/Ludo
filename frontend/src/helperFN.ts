@@ -1,7 +1,7 @@
-import type { Player, Players } from "./types/types";
+import type { Players } from "./types/types";
 
 const PATH_SIZE = 40;
-const HOME_RADIUS = 25;
+// const HOME_RADIUS = 25;
 
 export function normalizePawnPosition(x: number, y: number) {
   // If this looks like a rectangle top-left (path box)

@@ -1,15 +1,12 @@
-import { useState } from "react";
 import HomeBase from "../../components/ludo/HomeBase";
 import PawnPosition from "../../components/ludo/Pawn";
 import PawnPath from "../../components/ludo/PawnPath";
 import VictoryBox from "../../components/ludo/victoryBox";
 import PlayerBox from "../../components/ludo/PlayerBox";
 import useSocketStore from "../../store/SocketStore";
-import { GameEnd } from "../../components/badges/GameEnd";
-
 
 export default function Board() {
-  const gameStatus = useSocketStore((s) => s.gameStatus);
+  // const gameStatus = useSocketStore((s) => s.gameStatus);
   const players = useSocketStore((s) => s.players);
   if (!players) return null;
 

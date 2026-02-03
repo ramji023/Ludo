@@ -64,7 +64,7 @@ export default class AudioManager {
 
   stopAll() {
     // Stop all audios
-    this.audios.forEach((audio, url) => {
+    this.audios.forEach((_, url) => {
       this.stop(url);
     });
   }

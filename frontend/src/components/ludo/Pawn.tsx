@@ -3,7 +3,7 @@ import PawnIcon from "../../icons/PawnIcon";
 import type { Pawn, Player } from "../../types/types";
 import { useEffect, useState } from "react";
 import {
-  checkIfAllPawnsInHome,
+  // checkIfAllPawnsInHome,
   checkIfPawnInHome,
   getPawnOffset,
   normalizePawnPosition,
@@ -12,7 +12,7 @@ import {
 
 export default function PawnPosition() {
   const id = useSocketStore((s) => s.id);
-  const color = useSocketStore((s) => s.color);
+  // const color = useSocketStore((s) => s.color);
   const currentDiceValue = useSocketStore((s) => s.currentDiceValue);
   const currentPlayerTurn = useSocketStore((s) => s.currentPlayerTurn);
   const players = useSocketStore((s) => s.players); // track all the pawn positions of all players
@@ -152,7 +152,7 @@ export default function PawnPosition() {
   // if user click to any pawn
   function movePawn(player: Player, pawn: Pawn) {
     // console.log("movePawn function run");
-    // console.log("player id : ", player.id, "   ", player.username);
+    console.log("player id : ", player.id, "   ", player.username);
     // console.log("pawn data : ", pawn);
     setHasMoved(true); // mark setHasMoved true so player can not click on another his pawn
 

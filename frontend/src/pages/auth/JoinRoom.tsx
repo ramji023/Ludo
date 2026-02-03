@@ -9,7 +9,7 @@ export function JoinRoom() {
   const socket = useSocketStore((s) => s.socket); // to check wheather user is connected with socket or not
   const [showForm, setShowForm] = useState(true); //  track status of visibility of join-room-form
   const [webSocketUrl, setWebSocketUrl] = useState("");
-  const { setShouldConnect, error } = useWebSocket(webSocketUrl); // useWebSocket hook to send connection request
+  const { setShouldConnect } = useWebSocket(webSocketUrl); // useWebSocket hook to send connection request
   const [connecting, setIsConnecting] = useState(false); // manage state to track connection time
 
   const players = useSocketStore((s) => s.players); // track all of the player data

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { Send } from "lucide-react";
 import Menu from "../../icons/Menu";
 import useSocketStore from "../../store/SocketStore";
