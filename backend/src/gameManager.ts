@@ -455,6 +455,12 @@ export class GameManager {
                     };
                     broadcast(game.players, msg);
                   }
+                  // first delete all players
+                  game.players.forEach((player) => {
+                    this.User.delete(player.id);
+                  });
+                  // just delete that game data
+                  this.Game.delete(game.gameId);
                   return;
                 }
               } else {
@@ -584,5 +590,43 @@ export class GameManager {
       },
     };
     broadcast(game.players, msgData);
+  }
+
+  // write function to remove that player data
+  handleRemove(ws: WebSocket) {
+    // find the user by searching the whole this.User
+    let disconnectedUserId: string | null = null;
+
+    for (const [username, user] of this.User.entries()) {
+      if (user.socket === ws) {
+        console.log(`User ${username} disconnected`);
+        disconnectedUserId = user.id;
+        break;
+      }
+    }
+
+    if (!disconnectedUserId) {
+      console.log("User not found");
+      return;
+    }
+
+    // Find which game they were in (if any)
+    let userGame: Game | null = null;
+    for (const [gameId, game] of this.Game.entries()) {
+      if (game.hasPlayer(disconnectedUserId)) {
+        // Assuming you have this method
+        userGame = game;
+        break;
+      }
+    }
+
+    if (userGame) {
+      // Remove user from game
+      userGame.removePlayer(disconnectedUserId);
+      console.log(`Removed ${disconnectedUserId} from game ${userGame.gameId}`);
+    }
+
+    // Remove from User map
+    this.User.delete(disconnectedUserId);
   }
 }

@@ -11,6 +11,7 @@ export const SEND_CHAT_MESSAGE = "send_chat_message";
 export const TURN_UPDATED = "turn_updated"
 export const GAME_WON = "game_won";
 export const GAME_END = "game_ended";
+export const PLAYER_LEFT = "player_left"
 // <----------------  events send from client to server   ------------------------>
 
 

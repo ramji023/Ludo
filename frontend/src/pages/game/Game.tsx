@@ -11,6 +11,12 @@ export default function Game() {
   const [unreadMessages, setUnreadMessages] = useState(0); // track unread messages
   const chatMessages = useSocketStore((s) => s.chatMessages); // array to store all the messages got from server side
 
+  //write clean-up effect
+  useEffect(()=>{
+      return ()=>{
+        useSocketStore.getState().resetSocketSession(); // reset whole socket session
+      }
+  },[])
 
   useEffect(() => {
     if (gameStatus === "start") {

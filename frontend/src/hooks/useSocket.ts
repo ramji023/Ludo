@@ -23,6 +23,7 @@ export default function useWebSocket(webSocketConnectionUrl: string) {
       console.log("disconnected with websocket server");
       console.log("Code:", event.code, "Reason:", event.reason);
       setError("WebSocket connection is closed");
+      useSocketStore.getState().resetSocketSession(); //call the reset socket session
     };
   }, [webSocketConnectionUrl, shouldConnect]); // runs again whenever websocket connection url change or setShouldConnect change
 

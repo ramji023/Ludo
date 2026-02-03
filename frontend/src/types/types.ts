@@ -59,6 +59,7 @@ export interface SocketStoreType {
   audioManager: AudioManager | null;
   setAudioManager: (audio: AudioManager) => void;
   setSocketInstance: (socket: WebSocket) => void;
+  resetSocketSession:()=>void
 }
 
 export interface Player {

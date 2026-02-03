@@ -30,11 +30,10 @@ wss.on("connection", function (ws, req) {
   });
   ws.on("close", function () {
     console.log("someone leave the connection");
+    newWholeLogic.handleRemove(ws);
   });
 
   ws.on("error", function (err) {
     console.error(err);
   });
 });
-
-

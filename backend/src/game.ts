@@ -3,6 +3,8 @@ import User from "./user";
 import { homePosition, pawnPosition } from "./utils/pawnPath";
 import { ChatMessages, KillResult, pawnPositon } from "./type";
 import { getFreeHomePosition, isInHome, momentPath } from "./utils/helperFn";
+import { broadcast } from "./broadcaster";
+import { PLAYER_LEFT } from "./events";
 
 const LUDO_TURN_ORDER = ["red", "blue", "yellow", "green"] as const;
 
@@ -223,5 +225,37 @@ export default class Game {
     );
 
     return allPawnsInVictory;
+  }
+
+  // check if player is present in game or not
+  hasPlayer(playerId: string): boolean {
+    return [...this.players.values()].some((player) => player.id === playerId);
+  }
+
+  removePlayer(playerId: string): void {
+    const player = [...this.players.values()].find(
+      (player) => player.id === playerId,
+    );
+
+    if (!player) {
+      console.log(`Player ${playerId} not found in game ${this.gameId}`);
+      return;
+    }
+
+    // Remove the player
+    this.players.delete(player.id);
+    console.log(`Player ${player.username} removed from game ${this.gameId}`);
+
+    // Optional: Notify other players
+    const message = {
+      type: PLAYER_LEFT,
+      message:"a player left the game",
+      data: {
+        remainingPlayers: this.playerData(),
+      },
+    };
+
+    // broadcast the left player message
+    broadcast(this.players, message);
   }
 }

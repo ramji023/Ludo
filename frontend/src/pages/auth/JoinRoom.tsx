@@ -60,7 +60,7 @@ export function JoinRoom() {
       return;
     setIsConnecting(true); // make setIsConnecting true
     setWebSocketUrl(
-      `ws://localhost:8080?username=${username}&type=player&gameId=${gameId}`,
+      `${import.meta.env.VITE_BACKEND_BASE_URL}?username=${username}&type=player&gameId=${gameId}`,
     );
     // console.log(`ws://localhost:8080?username=${username}&type=host`);
     usernameRef.current = null; // mark usernameRef null after setting websocket url

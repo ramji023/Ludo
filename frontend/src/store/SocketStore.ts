@@ -16,8 +16,8 @@ const useSocketStore = create<SocketStoreType>((set) => ({
   killMovementData: null, // store the movement data of killed pawn
   chatMessages: [], // array to store all the messages
   winnerRank: [], // winner rank stored here
-  audioManager : null,  // store audio instance of audio manager
- setAudioManager : (audio)=>set({audioManager:audio}),
+  audioManager: null, // store audio instance of audio manager
+  setAudioManager: (audio) => set({ audioManager: audio }),
   setSocketInstance: (socket: WebSocket) => {
     set({ socket }); // store the socket object in socket
 
@@ -143,8 +143,32 @@ const useSocketStore = create<SocketStoreType>((set) => ({
           });
 
           break;
+
+        case "player_left":
+          set({
+            players: parsedDataObject.data.remainingPlayers,
+          });
+          break;
       }
     };
+  },
+
+  resetSocketSession: () => {
+    set({
+      socket: null,
+      id: null,
+      username: null,
+      gameId: null,
+      color: null,
+      players: null,
+      currentDiceValue: -1,
+      currentPlayerTurn: null,
+      movementData: null,
+      killMovementData: null,
+      chatMessages: [],
+      winnerRank: [],
+      audioManager: null,
+    });
   },
 }));
 
