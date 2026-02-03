@@ -33,7 +33,7 @@ export function CreateRoom() {
       setIsConnecting(false);
       setWebSocketUrl("");
     }
-  }, [socket, webSocketUrl]);
+  }, [socket]);
 
   const usernameRef = useRef<HTMLInputElement>(null); // create ref to track user input value
   // write function to send connection request to websocket server and make false to showForm

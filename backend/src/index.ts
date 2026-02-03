@@ -28,7 +28,7 @@ wss.on("connection", function (ws, req) {
   ws.on("message", (e) => {
     newWholeLogic.handleMessages(ws, e.toString()); // call message handler to handle all the messages
   });
-  ws.on("close", function () {
+  ws.on("close", function (event) {
     console.log("someone leave the connection");
     newWholeLogic.handleRemove(ws);
   });
