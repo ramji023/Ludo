@@ -33,7 +33,7 @@ export function CreateRoom() {
       setIsConnecting(false);
       setWebSocketUrl("");
     }
-  }, [socket]);
+  }, [socket,webSocketUrl]);
 
   const usernameRef = useRef<HTMLInputElement>(null); // create ref to track user input value
   // write function to send connection request to websocket server and make false to showForm
@@ -41,6 +41,7 @@ export function CreateRoom() {
     // console.log("username : ",typeof username , "  ",username.length)
     if (typeof username !== "string" || username.length < 0) return;
     setIsConnecting(true); // make setIsConnecting true
+    // wss://ludo-utu8.onrender.com
     setWebSocketUrl(`${import.meta.env.VITE_BACKEND_BASE_URL}?username=${username}&type=host`);
     // console.log(`ws://localhost:8080?username=${username}&type=host`);
     usernameRef.current = null; // mark usernameRef null after setting websocket url
