@@ -101,15 +101,15 @@ export default function Game() {
         {/* toggle button*/}
 
         {!openChatBox && (
-          <div
-            onClick={() => {
-              setOpenChatBox(true);
-              setUnreadMessages(0);
-            }}
-            className="fixed bottom-1 right-1 sm:bottom-4 sm:right-4 z-30 cursor-pointer"
-          >
+          <div className="fixed bottom-1 right-1 sm:bottom-4 sm:right-4 z-40 ">
             <div className="relative">
-              <div className="scale-75 sm:scale-100">
+              <div
+                onClick={() => {
+                  setOpenChatBox(true);
+                  setUnreadMessages(0);
+                }}
+                className="scale-75 sm:scale-100 cursor-pointer"
+              >
                 <TextBoxIcon />
               </div>
 
@@ -134,14 +134,14 @@ export default function Game() {
       </div>
       {gameStatus === "end" && <GameEnd />}
 
-      <div
-        onClick={() => {
-          useSocketStore.getState().resetSocketSession();
-          navigate("/");
-        }}
-        className="fixed bottom-1 left-1 sm:bottom-4 sm:right-4 z-30 cursor-pointer"
-      >
-        <div className="scale-75 sm:scale-100">
+      <div className="fixed bottom-1 left-1 sm:bottom-4 sm:right-4 z-20">
+        <div
+          onClick={() => {
+            useSocketStore.getState().resetSocketSession();
+            navigate("/");
+          }}
+          className="scale-75 sm:scale-100 cursor-pointer"
+        >
           <ExitIcon />
         </div>
       </div>
