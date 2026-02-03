@@ -2,7 +2,7 @@
 
 A modern, real-time multiplayer Ludo game built with React, Zustand, and WebSocket technology. Play with up to 4 players simultaneously and communicate via in-game chat!
 
-![Ludo Game Banner](https://res.cloudinary.com/dqr7qcgch/image/upload/v1770120479/4_fyi2ku.jpg)
+![Ludo Game Banner](https://res.cloudinary.com/dqr7qcgch/image/upload/v1770120852/b28f2c6c-c6c0-4441-a079-e6bf9641b447.png)
 
 ## 🎮 Features
 
