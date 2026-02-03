@@ -1,8 +1,8 @@
-# 🎲 Ludo Game - Multiplayer Real-Time Game
+# Ludo Game - Multiplayer Real-Time Game
 
 A modern, real-time multiplayer Ludo game built with React, Zustand, and WebSocket technology. Play with up to 4 players simultaneously and communicate via in-game chat!
 
-![Ludo Game Banner](https://res.cloudinary.com/dqr7qcgch/image/upload/v1769485469/5ec54f81-628b-4e7c-9029-cf41012662ef.png)
+![Ludo Game Banner](https://res.cloudinary.com/dqr7qcgch/image/upload/v1770120479/4_fyi2ku.jpg)
 
 ## 🎮 Features
 
@@ -17,13 +17,16 @@ A modern, real-time multiplayer Ludo game built with React, Zustand, and WebSock
 ## 🖼️ Screenshots
 
 ### Game Board
-![Game Board](https://res.cloudinary.com/dqr7qcgch/image/upload/v1769485469/5ec54f81-628b-4e7c-9029-cf41012662ef.png)
+![Game Board](https://res.cloudinary.com/dqr7qcgch/image/upload/v1770120479/4_fyi2ku.jpg)
+
+### Create Game
+![New Game](https://res.cloudinary.com/dqr7qcgch/image/upload/v1770120448/2_vmoykz.jpg)
 
 ### Player Lobby
-![Player Lobby](https://res.cloudinary.com/dqr7qcgch/image/upload/v1769485780/Screenshot_2026-01-27_091858_qv2kqs.png)
+![Player Lobby](https://res.cloudinary.com/dqr7qcgch/image/upload/v1770120448/3_tjr6fn.jpg)
 
 ### Register Page
-![Register Page](https://res.cloudinary.com/dqr7qcgch/image/upload/v1769485559/5a0b8b0d-d5ad-4ff8-96d2-cd718098ad4c.png)
+![Register Page](https://res.cloudinary.com/dqr7qcgch/image/upload/v1770120461/1_oh0we7.jpg)
 
 ## 🛠️ Tech Stack
 
@@ -74,7 +77,7 @@ Before running this project, make sure you have:
    cd backend
    pnpm start
    ```
-   The server will run on `http://localhost:3000`
+   The server will run on `ws://localhost:8080`
 
 2. **Start the Frontend**
    ```bash
@@ -139,7 +142,7 @@ CLIENT_URL=http://localhost:5173
 Create a `.env` file in the `frontend` directory:
 
 ```env
-REACT_APP_SOCKET_URL=http://localhost:3000
+REACT_APP_SOCKET_URL=ws://localhost:8080
 ```
 
 ## 🌐 WebSocket Events
