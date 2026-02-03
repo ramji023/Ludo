@@ -1,7 +1,7 @@
 import { Outlet } from "react-router-dom";
 import AudioManager from "../../audioManager";
 import useSocketStore from "../../store/SocketStore";
-
+// import { Volume2, VolumeOff } from "lucide-react";
 export default function Layout() {
   const audio = new AudioManager();
 
@@ -20,11 +20,17 @@ export default function Layout() {
     "https://res.cloudinary.com/dqr7qcgch/video/upload/v1769921939/snake-hiss-4-quicksoundscom-ypwaqg_OPdi99Xh_qs1vku.mp3",
   );
 
-  audio.preload("https://res.cloudinary.com/dqr7qcgch/video/upload/v1769921271/move-itcn9d_8oJkSMIx_v7k1cn.mp3")
+  audio.preload(
+    "https://res.cloudinary.com/dqr7qcgch/video/upload/v1769921271/move-itcn9d_8oJkSMIx_v7k1cn.mp3",
+  );
 
-  audio.preload("https://res.cloudinary.com/dqr7qcgch/video/upload/v1769922435/ochoochogift-winner-laugh-154997_pcmr4d.mp3");
+  audio.preload(
+    "https://res.cloudinary.com/dqr7qcgch/video/upload/v1769922435/ochoochogift-winner-laugh-154997_pcmr4d.mp3",
+  );
 
-  audio.preload("https://res.cloudinary.com/dqr7qcgch/video/upload/v1769923713/winning-218995_rtzqnf.mp3")
+  audio.preload(
+    "https://res.cloudinary.com/dqr7qcgch/video/upload/v1769923713/winning-218995_rtzqnf.mp3",
+  );
   return (
     <>
       <div className="relative min-h-screen flex items-center justify-center overflow-hidden">
@@ -40,11 +46,11 @@ export default function Layout() {
         <div className="absolute inset-0 bg-black/30" />
 
         {/* ludo logo  */}
-        <div className="absolute top-4 left-4 z-20 flex items-center gap-2">
+        <div className="absolute top-2 left-2 sm:top-4 sm:left-4 z-20 flex items-center gap-2">
           <img
             src="/ludo-bg/ludo_logo.png"
             alt="Ludo Master Logo"
-            className="w-25 h-25 object-contain"
+            className="w-16 h-16 sm:w-20 sm:h-20 md:w-25 md:h-25 object-contain"
           />
         </div>
         {/* render children component  */}

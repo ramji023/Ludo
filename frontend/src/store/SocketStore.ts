@@ -154,6 +154,7 @@ const useSocketStore = create<SocketStoreType>((set) => ({
   },
 
   resetSocketSession: () => {
+    useSocketStore.getState().audioManager?.stopAll();
     set({
       socket: null,
       id: null,

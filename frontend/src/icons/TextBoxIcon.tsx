@@ -7,7 +7,7 @@ export default function TextBoxIcon() {
         height="44"
         viewBox="0 0 24 24"
         fill="none"
-        stroke="#ef6407"
+        stroke="red"
         stroke-width="2"
         stroke-linecap="round"
         stroke-linejoin="round"

@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { Send } from "lucide-react";
+import { Send, X } from "lucide-react";
 import Menu from "../../icons/Menu";
 import useSocketStore from "../../store/SocketStore";
 
@@ -38,20 +38,28 @@ export default function Chatbox({ closeBox }: { closeBox: () => void }) {
     }
   }
   return (
-    <div className="h-full flex flex-col rounded-xl">
+    <div className="h-full flex flex-col rounded-xl bg-gray-900">
       {/* Header */}
       <div
         onClick={closeBox}
-        className=" bg-orange-500 p-1 py-2 border-b-2 cursor-pointer "
+        className="bg-orange-500 p-2 sm:p-1 sm:py-2 border-b-2 cursor-pointer flex items-center justify-between"
       >
-        <Menu />
+        <div className="flex items-center gap-2">
+          <div className="block sm:hidden">
+            <X size={24} className="text-white" />
+          </div>
+          <span className="text-white font-bold text-lg sm:hidden">Chat</span>
+        </div>
+        <div className="hidden sm:block">
+          <Menu />
+        </div>
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-3">
+      <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-2 sm:space-y-3">
         {chatMessages.length === 0 && (
           <>
-            <p className="text-white text-center text-lg">
+            <p className="text-white text-center text-base sm:text-lg">
               There is no messages
             </p>
           </>
@@ -61,15 +69,15 @@ export default function Chatbox({ closeBox }: { closeBox: () => void }) {
           chatMessages.map((msg) => (
             <div key={msg.messageId} className="flex gap-2">
               <div
-                className={`w-8 h-8 ${colorStyles[msg.color]} rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0`}
+                className={`w-7 h-7 sm:w-8 sm:h-8 ${colorStyles[msg.color]} rounded-full flex items-center justify-center text-white font-bold text-xs sm:text-sm flex-shrink-0`}
               >
                 {msg.username[0]}
               </div>
               <div className="flex-1">
-                <div className="text-orange-400 text-sm font-semibold">
+                <div className="text-orange-400 text-xs sm:text-sm font-semibold">
                   {msg.username}
                 </div>
-                <div className="bg-gray-800 text-white rounded-lg p-2 mt-1 text-sm">
+                <div className="bg-gray-800 text-white rounded-lg p-2 mt-1 text-xs sm:text-sm break-words">
                   {msg.message}
                 </div>
               </div>
@@ -80,20 +88,20 @@ export default function Chatbox({ closeBox }: { closeBox: () => void }) {
       </div>
 
       {/* Input */}
-      <div className="p-4 border-t-2 border-orange-500 bg-gray-900">
+      <div className="p-3 sm:p-4 border-t-2 border-orange-500 bg-gray-900">
         <div className="flex gap-2">
           <input
             type="text"
             ref={messageRef}
             onKeyPress={(e) => e.key === "Enter" && sendMessage()}
             placeholder="Type a message..."
-            className="flex-1 bg-gray-800 text-white border-2 border-orange-500 rounded-lg px-3 py-2 focus:outline-none focus:border-orange-400"
+            className="flex-1 bg-gray-800 text-white border-2 border-orange-500 rounded-lg px-3 py-2 text-sm sm:text-base focus:outline-none focus:border-orange-400"
           />
           <button
             onClick={sendMessage}
-            className=" text-white mx-2 rounded-lg transition-colors"
+            className="text-white rounded-lg transition-colors flex-shrink-0"
           >
-            <Send size={30} fill="#ef6407" strokeWidth={1.5} />
+            <Send size={24} className="sm:w-[30px] sm:h-[30px]" fill="#ef6407" strokeWidth={1.5} />
           </button>
         </div>
       </div>

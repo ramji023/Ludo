@@ -14,10 +14,10 @@ export default function PlayerBox({ color, position, player }: PlayerBoxProps) {
   };
 
   const positionStyles = {
-    "top-left": "top-0 -left-22",
-    "top-right": "top-0 -right-22",
-    "bottom-left": "bottom-0 -left-22",
-    "bottom-right": "bottom-0 -right-22",
+    "top-left": "-top-25 sm:top-0 -left-0 sm:-left-18 md:-left-20",
+    "top-right": "-top-25 sm:top-0 -right-0 sm:-right-18 md:-right-20",
+    "bottom-left": "-bottom-25 sm:bottom-0 -left-0 sm:-left-18 md:-left-20",
+    "bottom-right": "-bottom-25 sm:bottom-0 -right-0 sm:-right-18 md:-right-20",
   };
 
   const currentPlayerTurn = useSocketStore((s) => s.currentPlayerTurn); // current player turn
@@ -30,12 +30,12 @@ export default function PlayerBox({ color, position, player }: PlayerBoxProps) {
 
   return (
     <div
-      className={`absolute ${positionStyles[position]} flex flex-col gap-2 items-center`}
+      className={`absolute ${positionStyles[position]} flex flex-col gap-1 sm:gap-2 items-center`}
     >
       {/*player name box */}
       <div
-        className={`w-12 h-12 border-2 rounded-4xl flex items-center justify-center text-white text-2xl font-bold ${colorStyles[color]}
-        ${isActive ? "border-orange-500 shadow-xl" : "border-gray-400"}
+        className={`w-10 h-10 sm:w-12 sm:h-12 border-2 rounded-4xl flex items-center justify-center text-white text-lg sm:text-2xl font-bold ${colorStyles[color]}
+        ${isActive ? "border-orange-500 border-3 shadow-2xl hover:scale-105 active:scale-95 " : "border-gray-400"}
       `}
       >
         {player?.username[0].toUpperCase()}
@@ -254,7 +254,7 @@ function Dice({ color, playerId }: DiceProps) {
   return (
     <div
       data-testid="dice"
-      className={`w-12 h-12 ${bgColors[color]} rounded-lg transition-all relative
+      className={`w-10 h-10 sm:w-12 sm:h-12 ${bgColors[color]} rounded transition-all relative
       ${
         isActive && !isRolling && !hasRolled
           ? "cursor-pointer hover:scale-105 active:scale-95 shadow-lg"

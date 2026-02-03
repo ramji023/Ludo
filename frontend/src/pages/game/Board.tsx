@@ -12,18 +12,19 @@ export default function Board() {
 
   const getPlayerByColor = (color: string) => {
     const player = players.find((p) => p.color === color);
-    return player ? { id: player.id,username:player.username } : undefined;
+    return player ? { id: player.id, username: player.username } : undefined;
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen">
-      <div className="relative">
+    <div className="flex items-center justify-center h-screen px-2 py-16 sm:py-4">
+      <div className="relative w-[calc(100vw-1rem)] sm:w-[500px] md:w-[600px] aspect-square">
         <svg
           data-testid="game-board"
-          width="600"
-          height="600"
+          width="100%"
+          height="100%"
           viewBox="0 0 600 600"
-          className="bg-white border-2 border-black rounded-4xl"
+          className="bg-white border-2 border-black md:rounded"
+          preserveAspectRatio="xMidYMid meet"
         >
           <HomeBase />
           <VictoryBox />

@@ -33,7 +33,7 @@ export function CreateRoom() {
       setIsConnecting(false);
       setWebSocketUrl("");
     }
-  }, [socket,webSocketUrl]);
+  }, [socket, webSocketUrl]);
 
   const usernameRef = useRef<HTMLInputElement>(null); // create ref to track user input value
   // write function to send connection request to websocket server and make false to showForm
@@ -42,7 +42,9 @@ export function CreateRoom() {
     if (typeof username !== "string" || username.length < 0) return;
     setIsConnecting(true); // make setIsConnecting true
     // wss://ludo-utu8.onrender.com
-    setWebSocketUrl(`${import.meta.env.VITE_BACKEND_BASE_URL}?username=${username}&type=host`);
+    setWebSocketUrl(
+      `${import.meta.env.VITE_BACKEND_BASE_URL}?username=${username}&type=host`,
+    );
     // console.log(`ws://localhost:8080?username=${username}&type=host`);
     usernameRef.current = null; // mark usernameRef null after setting websocket url
   }
@@ -97,19 +99,19 @@ export function CreateRoom() {
         />
       ) : (
         <>
-          <div className="flex flex-col items-center gap-8">
+          <div className="flex flex-col items-center sm:gap-8 gap-6">
             {/* coupon code box */}
-            <div className="relative flex items-center">
+            <div className="relative flex items-center  w-full max-w-md sm:max-w-2xl md:max-w-4xl">
               {/* Code Box */}
-              <div className="bg-white pl-10 pr-10 py-6 shadow-2xl border-2 border-dashed border-black max-w-4xl">
+              <div className="bg-white px-6 sm:pl-10 sm:pr-10 py-4 sm:py-6 shadow-2xl border-2 border-dashed border-black max-w-4xl w-full">
                 <div className="text-center">
                   <p
                     data-testid="game-id"
-                    className="text-4xl font-mono font-bold text-black mb-2 wrap-break-word"
+                    className="text-2xl sm:text-3xl md:text-4xl font-mono font-bold text-black mb-2 wrap-break-word break-all"
                   >
                     {gameId}
                   </p>
-                  <p className="text-xs text-gray-700">
+                  <p className="text-xs sm:text-sm text-gray-700">
                     Share This Game Id with your friends
                   </p>
                 </div>
@@ -120,24 +122,24 @@ export function CreateRoom() {
             <button
               data-testid="start-button-btn"
               onClick={handleStartGame}
-              className="cursor-pointer relative group mt-4"
+              className="cursor-pointer relative group mt-2 sm:mt-4 w-full max-w-xs sm:max-w-none sm:w-auto"
             >
               {/* Button Shadow */}
-              <div className="absolute inset-0 bg-linear-to-b from-green-800 to-green-950 rounded-full transform translate-y-2" />
+              <div className="absolute inset-0 bg-linear-to-b from-green-800 to-green-950 rounded-full transform translate-y-1 sm:translate-y-2" />
 
               {/* Button Main */}
-              <div className="relative bg-linear-to-b from-green-400 to-green-600 hover:from-green-500 hover:to-green-700 px-6 py-4 rounded-full transform transition-all duration-150 active:translate-y-2 group-hover:-translate-y-1 shadow-2xl border-t-4 border-green-300">
+              <div className="relative bg-linear-to-b from-green-400 to-green-600 hover:from-green-500 hover:to-green-700 px-6 py-3 sm:py-4 rounded-full transform transition-all duration-150 active:translate-y-1 sm:active:translate-y-2 group-hover:-translate-y-1 shadow-2xl border-t-2 sm:border-t-4 border-green-300">
                 <span className="text-white text-3xl font-black drop-shadow-lg">
                   START GAME
                 </span>
                 {/* Top Highlight */}
-                <div className="absolute inset-x-0 top-0 h-6 bg-linear-to-b from-white/40 to-transparent rounded-t-full" />
+                <div className="absolute inset-x-0 top-0 h-4 sm:h-6  bg-linear-to-b from-white/40 to-transparent rounded-t-full" />
               </div>
             </button>
 
             {/* Players List - Bottom Right */}
-            <div className="fixed bottom-2 right-5 bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl border-2 border-orange-400 p-6 min-w-[280px]">
-              <h3 className="text-lg font-bold text-gray-800 mb-4 text-center border-b-2 border-orange-300 pb-2">
+            <div className="fixed bottom-2 right-2 sm:right-5 bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl border-2 border-orange-400 p-3 sm:p-6 min-w-[200px] sm:min-w-[280px] max-w-[90vw] sm:max-w-none">
+              <h3 className="text-base sm:text-lg font-bold text-gray-800 mb-3 sm:mb-4 text-center border-b-2 border-orange-300 pb-2">
                 Joined Players ({(players && players.length) ?? 0})
               </h3>
               <div className="flex flex-col gap-2">
@@ -152,15 +154,15 @@ export function CreateRoom() {
                         style={{
                           background: `linear-gradient(to bottom right, ${player.color}, ${player.color})`,
                         }}
-                        className="w-6 h-6 rounded-full  flex items-center justify-center shadow-lg flex-shrink-0"
+                        className="w-5 h-5 sm:w-6 sm:h-6 rounded-full  flex items-center justify-center shadow-lg flex-shrink-0"
                       >
-                        <span className="text-white text-lg font-bold">
+                        <span className="text-white text-sm sm:text-lgfont-bold">
                           {player.username.charAt(0).toUpperCase()}
                         </span>
                       </div>
                       {/* Username */}
                       <div className="flex-1 min-w-0">
-                        <p className="text-gray-800 font-semibold truncate text-sm">
+                        <p className="text-gray-800 font-semibold truncate text-xs sm:text-sm">
                           {player.id === useSocketStore.getState().id
                             ? `You (${useSocketStore.getState().type})`
                             : `${player.username} (${player.type})`}
@@ -180,10 +182,12 @@ export function CreateRoom() {
                       key={`empty-${index}`}
                       className="flex items-center gap-2 bg-gray-50 p-1 rounded-xl opacity-50"
                     >
-                      <div className="w-6 h-6 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center flex-shrink-0">
-                        <span className="text-gray-400 text-lg">?</span>
+                      <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center flex-shrink-0">
+                        <span className="text-gray-400 text-sm sm:text-lg">
+                          ?
+                        </span>
                       </div>
-                      <p className="text-gray-400 font-medium text-sm">
+                      <p className="text-gray-400 font-medium text-xs sm:text-sm">
                         Waiting for player...
                       </p>
                     </div>

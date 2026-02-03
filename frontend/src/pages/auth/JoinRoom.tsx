@@ -76,43 +76,45 @@ export function JoinRoom() {
           isConnecting={connecting}
         />
       ) : (
-        <div className="flex flex-col items-center gap-8">
+        <div className="flex flex-col items-center gap-6 sm:gap-8 px-4">
           {/* waiting message box */}
-          <div className="bg-white/90 backdrop-blur-sm px-16 py-12 rounded-3xl shadow-2xl border-4 border-orange-400">
+          <div className="bg-white/90 backdrop-blur-sm px-8 py-8 sm:px-12 sm:py-10 md:px-16 md:py-12 rounded-2xl sm:rounded-3xl shadow-2xl border-2 sm:border-4 border-orange-400 w-full max-w-md sm:max-w-2xl">
             <div className="text-center">
               {/* Animated Dots */}
-              <div className="flex justify-center gap-3 mb-6">
+              <div className="flex justify-center gap-2 sm:gap-3 mb-4 sm:mb-6">
                 <div
-                  className="w-4 h-4 bg-orange-500 rounded-full animate-bounce"
+                  className="w-3 h-3 sm:w-4 sm:h-4 bg-orange-500 rounded-full animate-bounce"
                   style={{ animationDelay: "0s" }}
                 />
                 <div
-                  className="w-4 h-4 bg-orange-500 rounded-full animate-bounce"
+                  className="w-3 h-3 sm:w-4 sm:h-4 bg-orange-500 rounded-full animate-bounce"
                   style={{ animationDelay: "0.2s" }}
                 />
                 <div
-                  className="w-4 h-4 bg-orange-500 rounded-full animate-bounce"
+                  className="w-3 h-3 sm:w-4 sm:h-4 bg-orange-500 rounded-full animate-bounce"
                   style={{ animationDelay: "0.4s" }}
                 />
               </div>
 
               {/* Main Text */}
-              <h2 className="text-4xl font-black text-gray-800 mb-2">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-gray-800 mb-2">
                 WAITING FOR HOST
               </h2>
-              <p className="text-xl text-gray-600">to start the game</p>
+              <p className="text-base sm:text-lg md:text-xl text-gray-600">
+                to start the game
+              </p>
             </div>
           </div>
 
           {/* Decorative Loading Circle */}
-          <div className="relative w-22 h-22">
-            <div className="absolute inset-0 border-8 border-orange-200 rounded-full" />
-            <div className="absolute inset-0 border-8 border-orange-500 rounded-full border-t-transparent animate-spin" />
+          <div className="relative w-16 h-16 sm:w-20 sm:h-20 md:w-22 md:h-22">
+            <div className="absolute inset-0 border-4 sm:border-6 md:border-8 border-orange-200 rounded-full" />
+            <div className="absolute inset-0 border-4 sm:border-6 md:border-8 border-orange-500 rounded-full border-t-transparent animate-spin" />
           </div>
 
           {/* Players List - Bottom Right */}
-          <div className="fixed bottom-2 right-5 bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl border-2 border-orange-400 p-6 min-w-[280px]">
-            <h3 className="text-lg font-bold text-gray-800 mb-4 text-center border-b-2 border-orange-300 pb-2">
+          <div className="fixed bottom-2 right-2 sm:right-5 bg-white/95 backdrop-blur-sm rounded-xl sm:rounded-2xl shadow-2xl border-2 border-orange-400 p-3 sm:p-6 min-w-[200px] sm:min-w-[280px] max-w-[90vw] sm:max-w-none">
+            <h3 className="text-base sm:text-lg font-bold text-gray-800 mb-3 sm:mb-4 text-center border-b-2 border-orange-300 pb-2">
               Joined Players ({(players && players.length) ?? 0}/4)
             </h3>
             <div className="flex flex-col gap-2">
@@ -123,14 +125,14 @@ export function JoinRoom() {
                     className="flex items-center gap-2 bg-linear-to-r from-orange-50 to-white p-1 rounded-xl hover:shadow-md transition-shadow"
                   >
                     {/* Avatar Circle */}
-                    <div className="w-6 h-6 rounded-full bg-linear-to-br from-orange-400 to-orange-600 flex items-center justify-center shadow-lg flex-shrink-0">
-                      <span className="text-white text-lg font-bold">
+                    <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-linear-to-br from-orange-400 to-orange-600 flex items-center justify-center shadow-lg flex-shrink-0">
+                      <span className="text-white text-sm sm:text-lg font-bold">
                         {player.username.charAt(0).toUpperCase()}
                       </span>
                     </div>
                     {/* Username */}
                     <div className="flex-1 min-w-0">
-                      <p className="text-gray-800 font-semibold truncate text-sm">
+                      <p className="text-gray-800 font-semibold truncate text-xs sm:text-sm">
                         {player.id === useSocketStore.getState().id
                           ? `You (${useSocketStore.getState().type})`
                           : `${player.username} (${player.type})`}
@@ -149,10 +151,12 @@ export function JoinRoom() {
                     key={`empty-${index}`}
                     className="flex items-center gap-2 bg-gray-50 p-1 rounded-xl opacity-50"
                   >
-                    <div className="w-6 h-6 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center flex-shrink-0">
-                      <span className="text-gray-400 text-lg">?</span>
+                    <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center flex-shrink-0">
+                      <span className="text-gray-400 text-sm sm:text-lg">
+                        ?
+                      </span>
                     </div>
-                    <p className="text-gray-400 font-medium text-sm">
+                    <p className="text-gray-400 font-medium text-xs sm:text-sm">
                       Waiting for player...
                     </p>
                   </div>
