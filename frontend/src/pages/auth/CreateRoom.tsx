@@ -1,4 +1,4 @@
-import { ArrowRight, MoveLeft, X } from "lucide-react";
+import { ArrowRight, MoveLeft } from "lucide-react";
 import { useEffect, useRef, useState, type RefObject } from "react";
 import useSocketStore from "../../store/SocketStore";
 import useWebSocket from "../../hooks/useSocket";
