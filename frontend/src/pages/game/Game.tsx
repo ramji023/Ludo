@@ -4,6 +4,8 @@ import Board from "./Board";
 import Chatbox from "./ChatBox";
 import useSocketStore from "../../store/SocketStore";
 import { GameEnd } from "../../components/badges/GameEnd";
+import ExitIcon from "../../icons/ExitIcon";
+import { useNavigate } from "react-router-dom";
 
 export default function Game() {
   const gameStatus = useSocketStore((s) => s.gameStatus);
@@ -52,6 +54,7 @@ export default function Game() {
     }
   }, [gameStatus]);
 
+  const navigate = useNavigate();
   return (
     <>
       <div className="relative min-h-screen overflow-hidden bg-black/90">
@@ -130,6 +133,18 @@ export default function Game() {
         )}
       </div>
       {gameStatus === "end" && <GameEnd />}
+
+      <div
+        onClick={() => {
+          useSocketStore.getState().resetSocketSession();
+          navigate("/");
+        }}
+        className="fixed bottom-1 left-1 sm:bottom-4 sm:right-4 z-30 cursor-pointer"
+      >
+        <div className="scale-75 sm:scale-100">
+          <ExitIcon />
+        </div>
+      </div>
     </>
   );
 }

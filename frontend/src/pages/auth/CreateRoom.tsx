@@ -1,4 +1,4 @@
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, MoveLeft, X } from "lucide-react";
 import { useEffect, useRef, useState, type RefObject } from "react";
 import useSocketStore from "../../store/SocketStore";
 import useWebSocket from "../../hooks/useSocket";
@@ -216,36 +216,45 @@ export function CreateRoomForm({
       createRoom(nameref.current.value);
     }
   };
+  const navigate = useNavigate()
   return (
     <>
-      <div className="bg-white/90 backdrop-blur-sm px-12 py-10 rounded-3xl shadow-2xl border-4 border-orange-400">
-        <div className="flex flex-col gap-8">
-          <input
-            type="text"
-            ref={nameref}
-            name="Username"
-            placeholder="Enter your name"
-            className="border-2 border-orange-400 px-5 py-2 rounded-xl text-black bg-gray-200"
-          />
-          <div className="flex justify-center items-center">
-            <button
-              onClick={handleCreateRoom}
-              disabled={isConnecting}
-              data-testid="create-room-btn"
-              className={`min-w-45 px-4 py-2 rounded-xl font-semibold flex items-center justify-center gap-2 text-white transition-all ${
-                isConnecting
-                  ? "bg-orange-400 cursor-not-allowed"
-                  : "bg-orange-500 cursor-pointer hover:bg-orange-600"
-              }`}
-            >
-              {isConnecting ? (
-                <div className="w-6 h-6 border-3 border-white border-t-transparent rounded-full animate-spin"></div>
-              ) : (
-                <>
-                  Create Room <ArrowRight className="w-5 h-5" />
-                </>
-              )}
-            </button>
+      <div className="px-8 py-5 bg-white/90 backdrop-blur-sm rounded-3xl shadow-2xl border-4 border-orange-400">
+        {/* // add arrow icon  */}
+        <div
+        onClick={()=>{navigate("/")}}
+        className="text-orange-500 cursor-pointer">
+          <MoveLeft className="w-8 h-8 "/>
+        </div>
+        <div className="px-4 py-5">
+          <div className="flex flex-col gap-8">
+            <input
+              type="text"
+              ref={nameref}
+              name="Username"
+              placeholder="Enter your name"
+              className="border-2 border-orange-400 px-5 py-2 rounded-xl text-black bg-gray-200"
+            />
+            <div className="flex justify-center items-center">
+              <button
+                onClick={handleCreateRoom}
+                disabled={isConnecting}
+                data-testid="create-room-btn"
+                className={`min-w-45 px-4 py-2 rounded-xl font-semibold flex items-center justify-center gap-2 text-white transition-all ${
+                  isConnecting
+                    ? "bg-orange-400 cursor-not-allowed"
+                    : "bg-orange-500 cursor-pointer hover:bg-orange-600"
+                }`}
+              >
+                {isConnecting ? (
+                  <div className="w-6 h-6 border-3 border-white border-t-transparent rounded-full animate-spin"></div>
+                ) : (
+                  <>
+                    Create Room <ArrowRight className="w-5 h-5" />
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         </div>
       </div>
