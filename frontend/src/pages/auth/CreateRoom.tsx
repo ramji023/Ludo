@@ -138,7 +138,7 @@ export function CreateRoom() {
             </button>
 
             {/* Players List - Bottom Right */}
-            <div className="fixed bottom-2 right-2 sm:right-5 bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl border-2 border-orange-400 p-3 sm:p-6 min-w-[200px] sm:min-w-[280px] max-w-[90vw] sm:max-w-none">
+            <div className="fixed bottom-2 right-2 sm:right-5 bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl border-2 border-orange-400 py-0 px-2 sm:p-6 min-w-[200px] sm:min-w-[280px] max-w-[90vw] sm:max-w-none">
               <h3 className="text-base sm:text-lg font-bold text-gray-800 mb-3 sm:mb-4 text-center border-b-2 border-orange-300 pb-2">
                 Joined Players ({(players && players.length) ?? 0})
               </h3>

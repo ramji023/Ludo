@@ -72,7 +72,7 @@ export default function Game() {
             className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 lg:w-25 lg:h-25 object-contain"
           />
         </div>
-        <div className="relative z-20 flex transition-all duration-500 ease-in-out shadow-6xl">
+        <div className="relative z-20 flex transition-all duration-500 ease-in-out shadow-6xl ">
           {/* ludo board */}
           <div
             className={`transition-all duration-500 ${openChatBox ? "w-full md:w-[calc(100%-15rem)]" : "w-full"}`}
@@ -103,7 +103,7 @@ export default function Game() {
               setOpenChatBox(true);
               setUnreadMessages(0);
             }}
-            className="fixed bottom-3 right-3 sm:bottom-4 sm:right-4 z-30 cursor-pointer"
+            className="fixed bottom-1 right-1 sm:bottom-4 sm:right-4 z-30 cursor-pointer"
           >
             <div className="relative">
               <div className="scale-75 sm:scale-100">

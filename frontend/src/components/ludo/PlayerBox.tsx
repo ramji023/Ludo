@@ -14,10 +14,10 @@ export default function PlayerBox({ color, position, player }: PlayerBoxProps) {
   };
 
   const positionStyles = {
-    "top-left": "-top-25 sm:top-0 -left-0 sm:-left-18 md:-left-20",
-    "top-right": "-top-25 sm:top-0 -right-0 sm:-right-18 md:-right-20",
-    "bottom-left": "-bottom-25 sm:bottom-0 -left-0 sm:-left-18 md:-left-20",
-    "bottom-right": "-bottom-25 sm:bottom-0 -right-0 sm:-right-18 md:-right-20",
+    "top-left": "-top-23 sm:top-0 -left-0 sm:-left-18 md:-left-20",
+    "top-right": "-top-23 sm:top-0 -right-0 sm:-right-18 md:-right-20",
+    "bottom-left": "-bottom-23 sm:bottom-0 -left-0 sm:-left-18 md:-left-20",
+    "bottom-right": "-bottom-23 sm:bottom-0 -right-0 sm:-right-18 md:-right-20",
   };
 
   const currentPlayerTurn = useSocketStore((s) => s.currentPlayerTurn); // current player turn
@@ -126,7 +126,7 @@ function Dice({ color, playerId }: DiceProps) {
     if (currentDiceValue > 0 && playerId === currentPlayerTurn) {
       const elapsed_time = Date.now() - startTimeRef.current;
       console.log("elapsed time : ", elapsed_time);
-      const remaining_time = Math.max(0, 500 - elapsed_time);
+      const remaining_time = Math.max(0, 1000 - elapsed_time);
       console.log("remaining time : ", remaining_time);
 
       timeoutRef.current = setTimeout(() => {
@@ -182,7 +182,7 @@ function Dice({ color, playerId }: DiceProps) {
 
   // function to render the dots on dice
   const renderDots = () => {
-    const dotClass = "w-2 h-2 bg-white rounded-full absolute";
+    const dotClass = "w-1 h-1 sm:w-2 sm:h-2 bg-white rounded-full absolute";
 
     return (
       <div className="relative w-full h-full">
